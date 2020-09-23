@@ -1,0 +1,13 @@
+devpack
+warg
+draugr
+apppath
+numpy
+scipy
+torch
+tensorboard
+tensorflow
+#librosa
+scikit-learn
+tqdm
+torchvision

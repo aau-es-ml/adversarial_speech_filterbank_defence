@@ -1,0 +1,3 @@
+[submodule "external/rVADfast"]
+	path = external/rVADfast
+	url = git@github.com:zhenghuatan/rVADfast.git
