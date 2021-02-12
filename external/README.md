@@ -1,1 +1,0 @@
-# Voice Activity Detection

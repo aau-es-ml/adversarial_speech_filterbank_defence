@@ -6,5 +6,3 @@ __doc__ = r"""
 
            Created on 22/06/2020
            """
-
-from .adversarial_signal_classifier import *
