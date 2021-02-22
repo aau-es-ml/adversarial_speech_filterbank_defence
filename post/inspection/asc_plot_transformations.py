@@ -10,6 +10,7 @@ __doc__ = r"""
 from itertools import chain
 from pathlib import Path
 import sys
+from typing import Sequence
 
 import librosa
 from librosa.display import specshow
@@ -35,7 +36,12 @@ from draugr.numpy_utilities import Split
 from draugr.visualisation import SubplotSession
 from warg import NOD
 
-from configs.experiment_config import NOISED_SETS, NO_AUG_TO_NOISE, TRUNCATED_SPLITS
+from configs.experiment_config import (
+    NOISED_SETS,
+    NO_AUG_TO_NOISE,
+    TRUNCATED_SETS,
+    TRUNCATED_SPLITS,
+)
 from pre.asc_transformation_spaces import CepstralSpaceEnum, OtherSpacesEnum
 from configs import (
     DATA_ROOT_PATH,
@@ -43,14 +49,18 @@ from configs import (
     EXPORT_RESULTS_PATH,
 )
 from data import AdversarialSpeechBlockDataset, AdversarialSpeechDataset
+from draugr.visualisation import use_monochrome_style
+
+
+__all__ = []
 
 if __name__ == "__main__":
 
     def plot_rep(
         experiments,
-        transformations=(*CepstralSpaceEnum, OtherSpacesEnum.stft),
-        embedding_path=EXPORT_RESULTS_PATH / "rep",
-    ):
+        transformations: Sequence = (*CepstralSpaceEnum, OtherSpacesEnum.short_term_ft),
+        embedding_path: Path = EXPORT_RESULTS_PATH / "rep",
+    ) -> None:
         """
     always called after asc_plot_signals!
 
@@ -59,6 +69,7 @@ if __name__ == "__main__":
     :param embedding_path:
     :return:
     """
+        use_monochrome_style()
 
         if torch.cuda.is_available():
             device = auto_select_available_cuda_device(2048)
@@ -129,7 +140,10 @@ if __name__ == "__main__":
                                     # print(f'hit! {names_id1} {test_names[idx]}')
                                     with SubplotSession(figsize=(10, 10)) as a:
                                         fig, (ax, *_) = a
-                                        if transformation == OtherSpacesEnum.stft:
+                                        if (
+                                            transformation
+                                            == OtherSpacesEnum.short_term_ft
+                                        ):
                                             """
 
                       left = -(spec.shape[0] / sr) / 2
@@ -178,22 +192,72 @@ if __name__ == "__main__":
 
                                             ax.set_ylabel("Frequency [hz]")
                                             ax.set_xlabel("Time [Seconds]")
+                                            cax = pyplot.colorbar(format="%+2.0f dB")
+                                            # cax.set_label("Magnitude")
+                                        elif (
+                                            transformation == OtherSpacesEnum.power_spec
+                                        ):
+                                            """
+  
+                      left = -(spec.shape[0] / sr) / 2
+                      right = (
+                          spec.shape[1] * 256 / sr
+                          + (spec.shape[0] / sr) / 2
+                      )
+                      lower = -sr / spec.shape[0]
+                      upper = sr / 2 + sr / spec.shape[0]
+                      # freqs = fftfreq(spec.shape[0], 1 / float(sr))[:(spec.shape[0] // 2)]
+                      # ax.yaxis.set_ticks(freqs[::16]) # TODO: FIX
+                      # ax.yaxis.set_ticklabels([f'{m:.0f}' for m in freqs[::16]])
+                      spec = (
+                          numpy.abs(predictors2.to("cpu").numpy()[0][0])
+                          ** 2
+                      )
+                      spec = spec[: (spec.shape[0] // 2)]
+                      stft_db = 10 * numpy.log10()
+                      
+                      pyplot.imshow(stft_db,
+                                    # fignum=0, #use current axis
+                                    origin="lower",
+                                    cmap="gray_r",
+                                    aspect="auto",
+                                    extent=[left, right, lower, upper],
+                                    )  # Spectrogram
+                      """
 
+                                            spec = predictors2.to("cpu").numpy()[0][0]
+                                            specshow(
+                                                librosa.power_to_db(
+                                                    spec, ref=numpy.max
+                                                ),
+                                                y_axis="linear",
+                                                x_axis="time",
+                                                sr=sr,
+                                                hop_length=len(
+                                                    spec
+                                                ),  # half of fft length default
+                                                cmap="gray_r",
+                                            )
+
+                                            ax.set_ylabel("Frequency [hz]")
+                                            ax.set_xlabel("Time [Seconds]")
+                                            cax = pyplot.colorbar(format="%+2.0f dB")
+                                            # cax.set_label("Magnitude")
                                         else:
-                                            pyplot.imshow(
-                                                # librosa.power_to_db(
-                                                predictors2.to("cpu").numpy()[0][0].T
-                                                #    )
-                                                ,
+                                            img = specshow(
+                                                predictors2.to("cpu").numpy()[0][0].T,
+                                                x_axis="time",
+                                                ax=ax,
+                                                sr=sr,
+                                                hop_length=256,  # half of fft length default
                                                 # fignum=0,
                                                 cmap="gray_r",
-                                                aspect="auto",
-                                                origin="lower",
+                                                # aspect="auto",
+                                                # origin="lower",
                                             )
                                             ax.set_ylabel("Coefficients")
-                                            ax.set_xlabel("Time [ms]")
-                                        cax = pyplot.colorbar(format="%+2.0f dB")
-                                        # cax.set_label("Magnitude")
+                                            # ax.set_xlabel("Time [ms]")
+                                            fig.colorbar(img, ax=ax)
 
                                         pyplot.tight_layout()
                                         pyplot.title(
@@ -221,9 +285,7 @@ if __name__ == "__main__":
             # **NOISED_SETS,
             **NO_AUG_TO_NOISE,
         ),
-        # transformations=(OtherSpacesEnum.stft,)
-        # CepstralSpaceEnum.linear_fcc,
-        #    ),
+        # transformations=(          OtherSpacesEnum.short_term_ft,          CepstralSpaceEnum.linear_fcc,          ),
     )
 
     # system_open_path(EXPORT_RESULTS_PATH / "rep", verbose=True)

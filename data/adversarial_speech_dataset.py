@@ -15,8 +15,6 @@ from typing import List, Sequence, Tuple
 
 __all__ = [
     "AdversarialSpeechDataset",
-    "DataCategories",
-    "AttackTypeEnum",
     "misclassified_names",
 ]
 
@@ -44,16 +42,6 @@ elif 'soundfile' in audio_be:
 """
 
 
-class AttackTypeEnum(Enum):
-    WhiteBox = "A"
-    BlackBox = "B"
-
-
-class DataCategories(Enum):
-    Normal = "normal"
-    Adversarial = "adversarial"
-
-
 def misclassified_names(pred, truth, names, threshold: float = 0.5):
     return names[
         (1 * (pred > threshold) != truth).reshape(-1)
@@ -63,9 +51,19 @@ def misclassified_names(pred, truth, names, threshold: float = 0.5):
 class AdversarialSpeechDataset(CategoricalDataset):
     """"""
 
+    class AttackTypeEnum(Enum):
+        WhiteBox = "A"
+        BlackBox = "B"
+
+    class DataCategories(Enum):
+        Normal = "normal"
+        Adversarial = "adversarial"
+
+    _categories = OrderedSet([c.value for c in DataCategories])
+
     @property
     def categories(self) -> OrderedSet[str]:
-        return OrderedSet([c.value for c in DataCategories])
+        return AdversarialSpeechDataset._categories
 
     @property
     def response_shape(self) -> Tuple[int, ...]:
@@ -143,16 +141,17 @@ class AdversarialSpeechDataset(CategoricalDataset):
 
         :param root_dir:
         :return:"""
-        normal_files, adv_files = AdversarialSpeechDataset.get_normal_adv_wav_files(
-            root_dir
-        )
+        (
+            normal_files,
+            adv_files,
+        ) = AdversarialSpeechDataset.get_normal_adv_wav_file_paths(root_dir)
         file_names = normal_files + adv_files
         response = [0] * len(normal_files) + [1] * len(adv_files)
 
         return file_names, response
 
     @staticmethod
-    def get_normal_adv_wav_files(
+    def get_normal_adv_wav_file_paths(
         path: pathlib.Path, verbose: bool = False
     ) -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
         """
@@ -205,10 +204,10 @@ if __name__ == "__main__":
 
     def main2():
         ds = AdversarialSpeechDataset(DATA_ROOT_A_PATH)
-        _ = ds.get_normal_adv_wav_files(
+        _ = ds.get_normal_adv_wav_file_paths(
             DATA_ROOT_PATH / "adversarial_dataset-A", verbose=True
         )
-        _ = ds.get_normal_adv_wav_files(
+        _ = ds.get_normal_adv_wav_file_paths(
             DATA_ROOT_PATH / "adversarial_dataset-B", verbose=True
         )
         print(

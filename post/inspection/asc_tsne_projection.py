@@ -26,7 +26,7 @@ from configs.path_config import (
 )
 from configs.training_config import TRAINING_CONFIG
 from data import AdversarialSpeechBlockDataset
-from data.adversarial_speech_dataset import DataCategories
+from data.adversarial_speech_dataset import AdversarialSpeechDataset
 from draugr.torch_utilities import (
     TensorBoardPytorchWriter,
     auto_select_available_cuda_device,
@@ -117,7 +117,10 @@ if __name__ == "__main__":
                                 )
                                 pyplot.legend(
                                     handles=scattr.legend_elements()[0],
-                                    labels=[c.value for c in DataCategories],
+                                    labels=[
+                                        c.value
+                                        for c in AdversarialSpeechDataset.DataCategories
+                                    ],
                                 )
                                 pyplot.title(f"{cepstral_name.value} {k}")
                                 pyplot.savefig(

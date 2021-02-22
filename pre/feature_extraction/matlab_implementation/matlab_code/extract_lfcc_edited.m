@@ -1,4 +1,4 @@
-function [stat,delta,double_delta,stft]=extract_lfcc(speech,Fs,Window_Length,NFFT,No_Filter)
+function [stat,delta,double_delta,stft,power_spec]=extract_lfcc(speech,Fs,Window_Length,NFFT,No_Filter)
 % Function for computing LFCC features
 % Usage: [stat,delta,double_delta]=extract_lfcc(file_path,Fs,Window_Length,No_Filter)
 %
@@ -33,15 +33,15 @@ y_framed=framedspeech.*repmat(w',size(framedspeech,1),1);
 %--------------------------------------------------------------------------
 f=(Fs/2)*linspace(0,1,NFFT/2+1);
 filbandwidthsf=linspace(min(f),max(f),No_Filter+2);
-stft = fft(y_framed',NFFT);
-fr_all=(abs(stft)).^2;
-fa_all=fr_all(1:(NFFT/2)+1,:)';
+stft = complex(fft(y_framed',NFFT)); % ensure result is complex even if y_framed is all zeroes
+power_spec=(abs(stft)).^2;
+power_spec=power_spec(1:(NFFT/2)+1,:)';
 filterbank=zeros((NFFT/2)+1,No_Filter);
 for i=1:No_Filter
     filterbank(:,i)=trimf(f,[filbandwidthsf(i),filbandwidthsf(i+1),...
         filbandwidthsf(i+2)]);
 end
-filbanksum=fa_all*filterbank(1:end,:);
+filbanksum=power_spec*filterbank(1:end,:);
 %-------------------------Calculate Static Cepstral------------------------
 t=dct(log10(filbanksum'+eps));
 t=(t(1:No_Filter,:));

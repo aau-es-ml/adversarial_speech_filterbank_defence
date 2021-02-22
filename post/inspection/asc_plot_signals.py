@@ -13,75 +13,79 @@ from typing import Sequence
 import librosa
 import numpy
 from draugr.scipy_utilities import read_normalised_wave, write_normalised_wave
-from draugr.visualisation import FigureSession, SubplotSession
+from draugr.visualisation import FigureSession, SubplotSession, fix_edge_gridlines
 from librosa.display import specshow
 from matplotlib import pyplot
-from scipy.io import wavfile
 
 from apppath import ensure_existence, system_open_path
-from configs import DATA_ROOT_PATH, EXPORT_RESULTS_PATH, DATA_REGULAR_PROCESSED_PATH
+from configs import DATA_ROOT_PATH, EXPORT_RESULTS_PATH
 from data import AdversarialSpeechDataset
 from draugr.tqdm_utilities import progress_bar
-from pre.asc_transformation_spaces import CepstralSpaceEnum
+from draugr.visualisation import use_monochrome_style
 
 if __name__ == "__main__":
 
     def plot_signal(
         root_path: Path,
-        datasets=(
+        datasets: Sequence = (
             "adversarial_dataset-A",
             # "adversarial_dataset-B"
         ),
-        out_part_id=(
+        out_part_id: Sequence = (
             "A",
             # "B"
         ),
         *,
-        n_fcc=20,
-        block_window_size_ms=512,  # 128
-        block_window_step_size_ms=512,  # 128
-        n_fft=512,
-        embedding_path=ensure_existence(EXPORT_RESULTS_PATH / "rep"),
+        n_fcc: int = 20,
+        block_window_size_ms: int = 512,  # 128
+        block_window_step_size_ms: int = 512,  # 128
+        n_fft: int = 512,
+        embedding_path: Path = ensure_existence(EXPORT_RESULTS_PATH / "rep"),
+        max_files: int = 6,  # <0 = Inf samples
     ) -> None:
         r"""
 
-:param processed_path:
-:param root_path:
-:type root_path:
-:param block_window_size_ms:
-:type block_window_size_ms:
-:param block_window_step_size_ms:
-:type block_window_step_size_ms:
-:param n_fft:
-:type n_fft:
-:param cepstrals:
-:type cepstrals:
-:param datasets:
-:type datasets:
-:param out_part_id:
-:type out_part_id:
-:return:
-:rtype:
-"""
-        max_files: int = 6  # <0 = Inf samples
+    :param max_files:
+    :param n_fcc:
+    :param embedding_path:
+    :param root_path:
+    :type root_path:
+    :param block_window_size_ms:
+    :type block_window_size_ms:
+    :param block_window_step_size_ms:
+    :type block_window_step_size_ms:
+    :param n_fft:
+    :type n_fft:
+    :param datasets:
+    :type datasets:
+    :param out_part_id:
+    :type out_part_id:
+    :return:
+    :rtype:
+    """
+
+        use_monochrome_style()
+
         block_window_size = block_window_size_ms
         block_window_step_size = block_window_step_size_ms
         n_fft_filters = n_fft  # fft length in the matlab mfcc function
 
         for data_s, part_id in progress_bar(zip(datasets, out_part_id)):
-            (
-                file_paths,
-                categories,
-            ) = AdversarialSpeechDataset.get_dataset_files_and_categories(
+            normals, advs = AdversarialSpeechDataset.get_normal_adv_wav_file_paths(
                 root_path / data_s
             )
+
+            num_samples_each = max_files // 2
+            file_paths = normals[:num_samples_each]
+            categories = [0] * num_samples_each
+
+            file_paths += advs[:num_samples_each]
+            categories += [1] * num_samples_each
 
             for (ith_file_idx, (file_, file_label)) in zip(
                 range(len(file_paths)),
                 progress_bar(zip(file_paths, categories), total=len(file_paths)),
             ):
-                if max_files and ith_file_idx >= max_files:
-                    break
 
                 try:
                     sampling_rate, wav_data = read_normalised_wave(file_)
@@ -112,12 +116,16 @@ if __name__ == "__main__":
                         embedding_path
                         / f"{parts[-1]}"
                         / "raw"
+                        / f"{AdversarialSpeechDataset._categories[file_label]}"
                         / f'{"_".join(parts[:-1])}'
                     )
-                    a_path = a / f"{file_label}_{file_.stem}_all"
+                    a_path = a / f"{file_.stem}_all"
                     with FigureSession():
                         pyplot.plot(wav_data)
-                        pyplot.title(f"{file_label} {file_.stem}.All")
+                        fix_edge_gridlines()
+                        pyplot.title(
+                            f"{AdversarialSpeechDataset._categories[file_label]} {file_.stem}.All"
+                        )
 
                         pyplot.savefig(f"{a_path}.svg")
                         write_normalised_wave(f"{a_path}.wav", sampling_rate, wav_data)
@@ -149,10 +157,18 @@ if __name__ == "__main__":
                     with SubplotSession(return_self=True) as sps:
                         img = specshow(
                             librosa.feature.mfcc(
-                                y=wav_data, sr=sampling_rate, n_mfcc=n_fcc
+                                y=wav_data,
+                                sr=sampling_rate,
+                                n_mfcc=n_fcc,
+                                n_fft=n_fft_filters,
+                                hop_length=n_fft_filters // 2,
+                                win_length=n_fft_filters,
                             ),
+                            sr=sampling_rate,
+                            hop_length=n_fft_filters // 2,
                             x_axis="time",
                             ax=sps.axs[0],
+                            cmap="gray_r",
                         )
                         sps.fig.colorbar(img, ax=sps.axs[0])
                         sps.axs[0].set(title="MFCC")
@@ -161,7 +177,7 @@ if __name__ == "__main__":
                     for ith_block in progress_bar(
                         range((data_len - block_window_size_ms) // block_step_size_ms)
                     ):
-                        path = a / f"{file_label}_{file_.stem}_block{ith_block}"
+                        path = a / f"{file_.stem}_block{ith_block}"
                         da = wav_data[
                             ith_block
                             * block_step_size_ms : ith_block
@@ -170,7 +186,10 @@ if __name__ == "__main__":
                         ]  # split data into blocks of window size
                         with FigureSession():
                             pyplot.plot(da)
-                            pyplot.title(f"{file_label} {file_.stem}.block{ith_block}")
+                            fix_edge_gridlines()
+                            pyplot.title(
+                                f"{AdversarialSpeechDataset._categories[file_label]} {file_.stem}.block{ith_block}"
+                            )
                             pyplot.savefig(f"{path}.svg")
                             write_normalised_wave(f"{path}.wav", sampling_rate, da)
                         with FigureSession():
@@ -201,13 +220,22 @@ if __name__ == "__main__":
                         with SubplotSession(return_self=True) as sps:
                             img = specshow(
                                 librosa.feature.mfcc(
-                                    y=da, sr=sampling_rate, n_mfcc=n_fcc
+                                    y=da,
+                                    sr=sampling_rate,
+                                    n_mfcc=n_fcc,
+                                    n_fft=n_fft_filters,
+                                    hop_length=n_fft_filters // 2,
+                                    win_length=n_fft_filters,
                                 ),
+                                sr=sampling_rate,
+                                hop_length=n_fft_filters // 2,
                                 x_axis="time",
                                 ax=sps.axs[0],
+                                cmap="gray_r",
                             )
                             sps.fig.colorbar(img, ax=sps.axs[0])
                             sps.axs[0].set(title="MFCC")
+                            # fix_edge_gridlines(sps.axs[0])
                             pyplot.savefig(f"{path}_librosa_ceps.svg")
 
                         # if ith_block > max_files - 1:

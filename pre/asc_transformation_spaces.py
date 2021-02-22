@@ -5,8 +5,8 @@ __all__ = ["CepstralSpaceEnum", "OtherSpacesEnum"]
 
 class CepstralSpaceEnum(Enum):
     """
-  Cepstral Spaces
-  """
+Cepstral Spaces
+"""
 
     mel_fcc = "mfcc"
     inverse_mfcc = "imfcc"
@@ -18,7 +18,8 @@ class CepstralSpaceEnum(Enum):
 
 class OtherSpacesEnum(Enum):
     """
-  Only used for plotting spectrograms, not for modelling
-  """
+Only used for plotting spectrograms, not for modelling
+"""
 
-    stft = "stft"
+    short_term_ft = "stft"
+    power_spec = "pspec"

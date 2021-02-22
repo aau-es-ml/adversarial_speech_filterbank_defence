@@ -18,7 +18,7 @@ import numpy
 import torch
 from sklearn.model_selection import train_test_split
 
-from data.adversarial_speech_dataset import DataCategories
+from data.adversarial_speech_dataset import AdversarialSpeechDataset
 from data.persistence_helper import extract_tuple_from_path
 from draugr.torch_utilities import to_tensor
 from draugr.torch_utilities import CategoricalDataset
@@ -49,7 +49,7 @@ class AdversarialSpeechBlockDataset(CategoricalDataset):
 
     @property
     def categories(self) -> OrderedSet[str]:
-        return OrderedSet([c.value for c in DataCategories])
+        return OrderedSet([c.value for c in AdversarialSpeechDataset.DataCategories])
 
     @property
     def response_shape(self) -> Tuple[int, ...]:

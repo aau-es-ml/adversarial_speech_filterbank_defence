@@ -27,13 +27,7 @@ from configs.path_config import (
 from data.persistence_helper import extract_tuple_from_path
 
 STRENGTHS = range(0, 20 + 1, 5)  # [0,5,10,15,20]
-NOISES = (
-    # "10m_10f_ssn",
-    # "5m_5f_babble",
-    # "airport",
-    # "babble",
-    # "car",
-)
+NOISES = ("10m_10f_ssn", "5m_5f_babble", "TBUS", "SPSQUARE", "PCAFETER", "DKITCHEN")
 
 DEFAULT_DISTRIBUTION = NOD(
     num_samples=None,
@@ -165,7 +159,7 @@ MERGED_SETS = NOD(
 )
 
 NO_AUG_TO_NOISE = {
-    f"EQUAL_MAPPING_A_to_SNR": NOD(
+    f"EQUAL_MAPPING_NO_AUG_to_NOISE_ALL_SNR": NOD(
         Train_Sets={"no_aug": (NOISED_SSS["no_aug_train"],)},
         Validation_Sets={"no_aug": (NOISED_SSS["no_aug_validation"],)},
         Test_Sets={
@@ -217,13 +211,59 @@ NOISED_SETS = {
     for k, v in e.items()
 }
 
+
+NOISES_TO_CAF = {
+    f"NOISES_ALL_SNR_to_PCAFETER": NOD(
+        Train_Sets={
+            k: v
+            for e in [
+                {
+                    f"{noise_type}_SNR_{strength}dB": (
+                        NOISED_SSS[f"{noise_type}_SNR_{strength}dB_train"],
+                    )
+                    for strength in STRENGTHS
+                }
+                for noise_type in [n for n in NOISES if n != "PCAFETER"]
+            ]
+            for k, v in e.items()
+        },
+        Validation_Sets={
+            k: v
+            for e in [
+                {
+                    f"{noise_type}_SNR_{strength}dB": (
+                        NOISED_SSS[f"{noise_type}_SNR_{strength}dB_validation"],
+                    )
+                    for strength in STRENGTHS
+                }
+                for noise_type in [n for n in NOISES if n != "PCAFETER"]
+            ]
+            for k, v in e.items()
+        },
+        Test_Sets={
+            k: v
+            for e in [
+                {
+                    f"{noise_type}_SNR_{strength}dB": (
+                        NOISED_SSS[f"{noise_type}_SNR_{strength}dB_test"],
+                    )
+                    for strength in STRENGTHS
+                }
+                for noise_type in ("PCAFETER",)
+            ]
+            for k, v in e.items()
+        },
+    )
+}
+
 EXPERIMENTS = NOD(
     **TRUNCATED_SETS,
     **MERGED_SETS,
     **TRUNCATED_SPLITS,
     **NOISED_SETS,
     **NO_AUG_TO_NOISE,
+    **NOISES_TO_CAF,
 )
 
 if __name__ == "__main__":
-    print(EXPERIMENTS)
+    print(EXPERIMENTS.keys())

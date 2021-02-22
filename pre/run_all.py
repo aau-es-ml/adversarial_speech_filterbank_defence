@@ -7,16 +7,15 @@ __doc__ = r"""
            Created on 04-12-2020
            """
 
+from .noises import compute_noised
 from .asc_compute_features import compute_transformations
-from .asc_noise_augmentation import compute_noise_augmented_samples
-from .asc_split_noise import split_noise_files
+
 from .asc_split_speech import compute_speech_silence_splits
 
 
 def run_all_precomputations():
-    split_noise_files()
     compute_speech_silence_splits()
-    compute_noise_augmented_samples()
+    compute_noised()
     compute_transformations()
 
 

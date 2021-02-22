@@ -17,6 +17,8 @@ PROJECT_APP_PATH = AppPath("adversarial_speech", __author__)
 NOISES_UNPROCESSED_ROOT_PATH = (
     Path.home() / "Data" / "Audio" / "noises" / "AuroraNoises"
 )
+DEMAND_NOISES = Path().home() / "Data" / "Audio" / "noises" / "demand_subset"
+
 GENERATED_NOISES_UNPROCESSED_ROOT_PATH = (
     PROJECT_APP_PATH.user_data / "unprocessed" / "generated_noises"
 )

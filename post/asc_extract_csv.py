@@ -10,7 +10,7 @@ __doc__ = r"""
 import os
 from pathlib import Path
 
-from apppath import AppPath, ensure_existence
+from apppath import AppPath, ensure_existence, system_open_path
 from configs.path_config import EXPORT_RESULTS_PATH
 from draugr.tensorboard_utilities import TensorboardEventExporter
 from draugr.tqdm_utilities import progress_bar
@@ -219,3 +219,4 @@ def extract_metrics(only_extract_latest=False):
 if __name__ == "__main__":
     extract_metrics(only_extract_latest=True)
     # extract_scalars_as_csv(verbose=False,export_train=False)
+    system_open_path(EXPORT_RESULTS_PATH / "csv", verbose=True)

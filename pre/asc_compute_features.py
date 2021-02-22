@@ -18,6 +18,10 @@ from configs.path_config import (
 from data import AdversarialSpeechDataset
 from data.persistence_helper import export_to_path
 from draugr.matlab_utilities import start_engine
+from draugr.tqdm_utilities import progress_bar
+
+from pre.asc_transformation_spaces import OtherSpacesEnum, CepstralSpaceEnum
+from pre.feature_extraction.matlab_extractor import cepstral_extractor
 
 __all__ = []
 
@@ -32,10 +36,6 @@ VERY SLOW!
 TODO: parallelise
 """
 
-from draugr.tqdm_utilities import progress_bar
-
-from pre.asc_transformation_spaces import OtherSpacesEnum, CepstralSpaceEnum
-from pre.feature_extraction.matlab_extractor import cepstral_extractor
 
 MATLAB_ENGINE = start_engine()
 matlab_files_path = str(
@@ -115,17 +115,18 @@ def file_wise_feature_extraction(
             block_sample_ids.append(f"{file_.stem}.block{0}")
 
             blocks_total += 1  # +1 to get the last part
-            all_cepstral_blocks.append(
-                cepstral_extractor(
-                    function,
-                    wav_data,
-                    matlab_engine_=MATLAB_ENGINE,
-                    sample_rate=sampling_rate,
-                    cepstral_window_length_ms=cepstral_window_length_ms,
-                    num_fft=n_fft,
-                    num_fcc=n_fcc,
-                )
-            )  # gather all files in one list
+            a = cepstral_extractor(
+                function,
+                wav_data,
+                matlab_engine_=MATLAB_ENGINE,
+                sample_rate=sampling_rate,
+                cepstral_window_length_ms=cepstral_window_length_ms,
+                num_fft=n_fft,
+                num_fcc=n_fcc,
+            )
+
+            # assert numpy.iscomplexobj(a), (wav_data,file_)
+            all_cepstral_blocks.append(a)  # gather all files in one list
 
             if ith_file_idx < 1:
                 print(
@@ -151,6 +152,7 @@ def file_wise_feature_extraction(
             ]
         )
 
+    print(features.shape)
     features = features.transpose((0, 2, 1))
     category = numpy.asarray(labels_split)
     assert len(block_sample_ids) == len(sample_blocks)
@@ -246,22 +248,22 @@ def block_wise_feature_extraction(
             for ith_block in progress_bar(
                 range(num_blocks), auto_describe_iterator=False
             ):
-                file_cepstral_blocks.append(
-                    cepstral_extractor(
-                        function,
-                        wav_data[
-                            ith_block
-                            * block_step_size_ms : ith_block
-                            * block_step_size_ms
-                            + block_window_size_ms
-                        ],  # split data into blocks of window size
-                        matlab_engine_=MATLAB_ENGINE,
-                        sample_rate=sampling_rate,
-                        cepstral_window_length_ms=cepstral_window_length_ms,
-                        num_fft=n_fft,
-                        num_fcc=n_fcc,
-                    )
+                a = cepstral_extractor(
+                    function,
+                    wav_data[
+                        ith_block * block_step_size_ms : ith_block * block_step_size_ms
+                        + block_window_size_ms
+                    ],  # split data into blocks of window size
+                    matlab_engine_=MATLAB_ENGINE,
+                    sample_rate=sampling_rate,
+                    cepstral_window_length_ms=cepstral_window_length_ms,
+                    num_fft=n_fft,
+                    num_fcc=n_fcc,
                 )
+                # print(a.shape)
+                # assert numpy.iscomplexobj(a), (wav_data, file_)
+                file_cepstral_blocks.append(a)
+
                 responses.append(file_label)
                 block_sample_ids.append(f"{file_.stem}.block{ith_block}")
 
@@ -301,7 +303,7 @@ def block_wise_feature_extraction(
     )
 
     # from (block_sample_ith, mfcc_filt_ith, window_ith) to (block_sample_ith, window_ith, mfcc_filt_ith)
-    features = features.transpose((0, 2, 1))  # transpose features
+    # features = features.transpose((0, 2, 1))  # transpose features
     # print(features.shape)
 
     assert len(block_sample_ids) == features.shape[0]
@@ -517,15 +519,15 @@ def compute_noised_dataset_features(
             for data_split in progress_bar(data_set.iterdir()):
                 if data_split.is_dir():
                     for snr in progress_bar(data_split.iterdir()):
-                        """ # NARROW SELLECTION
-            if True:
-              if data_split.name != 'training' or snr.name != 'no_aug': #validation
-                print('skip')
-                continue
-              else:
-                print('csiuah')
-                print(snr)
-            """
+
+                        if True:  # TODO: DISABLE! NARROW SELLECTION
+                            if (
+                                data_split.name != "training" or snr.name != "no_aug"
+                            ):  # validation
+                                print("skip")
+                                continue
+                            else:
+                                print(snr)
 
                         if True:
                             if data_split.is_dir():
@@ -572,7 +574,7 @@ def compute_transformations(
     compu_reg=True,
     compu_ss=True,
     compu_noised=True,
-    transformations: Sequence = (*CepstralSpaceEnum, OtherSpacesEnum.stft),
+    transformations: Sequence = (*CepstralSpaceEnum, OtherSpacesEnum.short_term_ft),
     # transformations=[FuncEnum.mel_fcc]
     block_window_size_ms=512,  # 512,  # 128
     block_window_step_size_ms=512,  # 512,  # 128
@@ -640,7 +642,8 @@ if __name__ == "__main__":
         compu_noised=True,
         skip_if_existing_file=False,
         transformations=[
-            OtherSpacesEnum.stft,
+            # OtherSpacesEnum.short_term_ft,
+            OtherSpacesEnum.power_spec,
             # CepstralSpaceEnum.linear_fcc
         ],
     )

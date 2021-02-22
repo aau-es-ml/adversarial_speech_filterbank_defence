@@ -21,21 +21,28 @@ from draugr.tqdm_utilities import progress_bar, parallel_umap
 
 from external.rVADfast.rVADfast.rVAD_fast import get_rvad
 
+RUN_PARALLEL = False  # REQUIRES LOTS OF RAM!!!!
+
 
 def aug_func(
     normal_example_file, packed: Tuple[Iterable[Path], Iterable[Path], Path, bool]
 ):
-    adv_files, noise_files, out_dir, parallel = packed
+    adv_files, noise_files, out_dir, parallel, skip_if_exists = packed
 
     clean_rvad_mask = get_rvad(*wavfile.read(normal_example_file))
     if True:
-        copyfile(
-            normal_example_file,
-            ensure_existence(out_dir / "no_aug" / "normal") / normal_example_file.name,
+        target = (
+            ensure_existence(out_dir / "no_aug" / "normal") / normal_example_file.name
         )
+        if skip_if_exists and target.exists():
+            pass
+        else:
+            copyfile(
+                normal_example_file, target,
+            )
 
     if True:  # ENABLE!
-        for noise_file in progress_bar(noise_files):
+        for noise_file in progress_bar(noise_files, disable=RUN_PARALLEL):
             compute_additive_noise_samples(
                 voice_activity_mask=clean_rvad_mask,
                 signal_file=normal_example_file,
@@ -46,7 +53,7 @@ def aug_func(
 
     if parallel:
         parallel_umap(
-            inner_noise_aug_func,
+            adv_noise_aug_func,
             adv_files,
             func_kws=dict(
                 noise_files=noise_files,
@@ -57,17 +64,24 @@ def aug_func(
         )
     else:
         for adv_example_file in progress_bar(
-            adv_files
+            adv_files, disable=RUN_PARALLEL
         ):  # Find adversarial examples matching original and use the clean rvad mask
-            inner_noise_aug_func(
+            adv_noise_aug_func(
                 adv_example_file,
                 packed=(noise_files, normal_example_file, clean_rvad_mask, out_dir),
             )
 
 
-def inner_noise_aug_func(
+def adv_noise_aug_func(
     adv_example_file, packed: Tuple[Iterable[Path], Path, numpy.ndarray, Path]
 ) -> None:
+    """
+  SLOW AND INEFFICIENT!
+
+  :param adv_example_file:
+  :param packed:
+  :return:
+  """
     noise_files, normal_example_file, clean_rvad_mask, out_dir = packed
     if (
         normal_example_file.name.split("-")[-1] in adv_example_file.name.split("-")[-1]
@@ -79,7 +93,7 @@ def inner_noise_aug_func(
             )
 
         if True:  # ENABLE!
-            for noise_file in progress_bar(noise_files):
+            for noise_file in progress_bar(noise_files, disable=RUN_PARALLEL):
                 compute_additive_noise_samples(
                     voice_activity_mask=clean_rvad_mask,
                     signal_file=adv_example_file,
@@ -89,27 +103,35 @@ def inner_noise_aug_func(
                 )
 
 
-def compute_noise_augmented_samples(parallel: bool = True):
+def compute_noise_augmented_samples(
+    parallel: bool = True, skip_if_exists: bool = True, subsets: bool = Split
+):
     if True:
-        for ss in ("A",):
+        for ss in progress_bar(("A",), disable=RUN_PARALLEL):
             data_path = DATA_ROOT_PATH / f"adversarial_dataset-{ss}"
 
             (
                 normal_files,
                 adv_files,
-            ) = AdversarialSpeechDataset.get_normal_adv_wav_files(data_path)
+            ) = AdversarialSpeechDataset.get_normal_adv_wav_file_paths(data_path)
             out_dir = DATA_ROOT_NOISED_UNPROCESSED_PATH / ss
 
             seed_stack(0)
 
-            normal_file_split_indexer = SplitIndexer(len(normal_files))
+            normal_file_split_indexer = SplitIndexer(len(normal_files),)
             adv_file_split_indexer = SplitIndexer(len(adv_files))
 
-            for (split, nf_indices, af_indices) in zip(
-                Split,
-                normal_file_split_indexer.shuffled_indices().values(),
-                adv_file_split_indexer.shuffled_indices().values(),
+            for (split, nf_indices, af_indices) in progress_bar(
+                zip(
+                    Split,
+                    normal_file_split_indexer.shuffled_indices().values(),
+                    adv_file_split_indexer.shuffled_indices().values(),
+                ),
+                disable=RUN_PARALLEL,
             ):
+                if split not in subsets:
+                    print(f"Skipping subset {split}")
+                    continue
                 noise_files = list(
                     (NOISES_SPLIT_UNPROCESSED_ROOT_PATH / split.value).rglob("*.wav")
                 )
@@ -128,10 +150,13 @@ def compute_noise_augmented_samples(parallel: bool = True):
                             noise_files=noise_files,
                             out_dir=out_dir_split,
                             parallel=False,  # deamonic process cannot have children
+                            skip_if_exists=skip_if_exists,
                         ),
                     )
                 else:
-                    for normal_example_file in progress_bar(normal_files_split):
+                    for normal_example_file in progress_bar(
+                        normal_files_split, disable=RUN_PARALLEL
+                    ):
                         aug_func(
                             normal_example_file,
                             packed=(
@@ -139,10 +164,13 @@ def compute_noise_augmented_samples(parallel: bool = True):
                                 noise_files,
                                 out_dir_split,
                                 parallel,
+                                skip_if_exists,
                             ),
                         )
 
 
 if __name__ == "__main__":
 
-    compute_noise_augmented_samples()
+    compute_noise_augmented_samples(
+        parallel=RUN_PARALLEL, subsets=(Split.Validation, Split.Testing)
+    )

@@ -29,16 +29,18 @@ def cepstral_extractor(
 ) -> numpy.ndarray:  # chose what kind of processing to do
     """
 
-      Matlab implementation, it is slow!
+    Matlab implementation, it is slow!
 
-    :param function:
-    :param data:
-    :param matlab_engine_:
-    :param sample_rate:
-    :param cepstral_window_length_ms:
-    :param num_fft:
-    :param num_fcc:
-    :return:"""
+  :param concat_delta_delta:
+  :param concat_delta:
+  :param function:
+  :param data:
+  :param matlab_engine_:
+  :param sample_rate:
+  :param cepstral_window_length_ms:
+  :param num_fft:
+  :param num_fcc:
+  :return:"""
 
     data_list_mat = ndarray_to_matlab(data)  # make data suited for matlab
     if function == CepstralSpaceEnum.mel_fcc:
@@ -53,11 +55,11 @@ def cepstral_extractor(
             float(num_fcc),
             nargout=3,
         )  # (speech,Fs,Window_Length,NFFT,No_Filter)
-        mfcc = matlab_to_ndarray(res[0]).T
+        mfcc = matlab_to_ndarray(res[0])
         if concat_delta:
-            mfcc = numpy.stack([mfcc, matlab_to_ndarray(res[1]).T])
+            mfcc = numpy.stack([mfcc, matlab_to_ndarray(res[1])])
         if concat_delta_delta:
-            mfcc = numpy.stack([mfcc, matlab_to_ndarray(res[2]).T])
+            mfcc = numpy.stack([mfcc, matlab_to_ndarray(res[2])])
         return mfcc
 
     elif function == CepstralSpaceEnum.inverse_mfcc:
@@ -70,27 +72,29 @@ def cepstral_extractor(
             float(num_fcc),
             nargout=3,
         )  # (speech,Fs,Window_Length,NFFT,No_Filter)
-        imfcc = matlab_to_ndarray(res[0]).T
+        imfcc = matlab_to_ndarray(res[0])
         if concat_delta:
-            imfcc = numpy.stack([imfcc, matlab_to_ndarray(res[1]).T])
+            imfcc = numpy.stack([imfcc, matlab_to_ndarray(res[1])])
         if concat_delta_delta:
-            imfcc = numpy.stack([imfcc, matlab_to_ndarray(res[2]).T])
+            imfcc = numpy.stack([imfcc, matlab_to_ndarray(res[2])])
         return imfcc
-    elif function == CepstralSpaceEnum.fourier_bessel_cc:
-        res = matlab_engine_.extract_fbcc_edited(
-            data_list_mat,
-            float(sample_rate),
-            float(cepstral_window_length_ms),
-            float(num_fft),
-            float(num_fcc),
-            nargout=3,
-        )  # (speech,Fs,Window_Length,NFFT,No_Filter)
-        fbcc = matlab_to_ndarray(res[0]).T
-        if concat_delta:
-            fbcc = numpy.stack([fbcc, matlab_to_ndarray(res[1]).T])
-        if concat_delta_delta:
-            fbcc = numpy.stack([fbcc, matlab_to_ndarray(res[2]).T])
-        return fbcc
+        """
+elif function == CepstralSpaceEnum.fourier_bessel_cc:
+    res = matlab_engine_.extract_fbcc_edited(
+        data_list_mat,
+        float(sample_rate),
+        float(cepstral_window_length_ms),
+        float(num_fft),
+        float(num_fcc),
+        nargout=3,
+    )  # (speech,Fs,Window_Length,NFFT,No_Filter)
+    fbcc = matlab_to_ndarray(res[0])
+    if concat_delta:
+        fbcc = numpy.stack([fbcc, matlab_to_ndarray(res[1])])
+    if concat_delta_delta:
+        fbcc = numpy.stack([fbcc, matlab_to_ndarray(res[2])])
+    return fbcc
+    """
     elif (
         function == CepstralSpaceEnum.gammatone_fcc
         or function == CepstralSpaceEnum.inverse_gfcc
@@ -125,11 +129,11 @@ def cepstral_extractor(
             filterbank,
             nargout=3,
         )  # (speech,Fs,Window_Length,NFFT,No_Filter,filterbank)
-        gfcc = matlab_to_ndarray(res[0]).T
+        gfcc = matlab_to_ndarray(res[0])
         if concat_delta:
-            gfcc = numpy.stack([gfcc, matlab_to_ndarray(res[1]).T])
+            gfcc = numpy.stack([gfcc, matlab_to_ndarray(res[1])])
         if concat_delta_delta:
-            gfcc = numpy.stack([gfcc, matlab_to_ndarray(res[2]).T])
+            gfcc = numpy.stack([gfcc, matlab_to_ndarray(res[2])])
         return gfcc
     elif function == CepstralSpaceEnum.linear_fcc:
         res = matlab_engine_.extract_lfcc_edited(
@@ -140,24 +144,40 @@ def cepstral_extractor(
             float(num_fcc),
             nargout=4,
         )  # (speech,Fs,Window_Length,NFFT,No_Filter)
-        lfcc = matlab_to_ndarray(res[0]).T
+        lfcc = matlab_to_ndarray(res[0])
         if concat_delta:
-            lfcc = numpy.stack([lfcc, matlab_to_ndarray(res[1]).T])
+            lfcc = numpy.stack([lfcc, matlab_to_ndarray(res[1])])
         if concat_delta_delta:
-            lfcc = numpy.stack([lfcc, matlab_to_ndarray(res[2]).T])
+            lfcc = numpy.stack([lfcc, matlab_to_ndarray(res[2])])
         return lfcc
-    elif function == OtherSpacesEnum.stft:
-        return numpy.asarray(
+    elif function == OtherSpacesEnum.short_term_ft:
+
+        return matlab_to_ndarray(
             matlab_engine_.extract_lfcc_edited(
                 data_list_mat,
                 float(sample_rate),
                 float(cepstral_window_length_ms),
                 float(num_fft),
                 float(num_fcc),
-                nargout=4,
+                nargout=5,
+            )[
+                -2
+            ]  # (speech,Fs,Window_Length,NFFT,No_Filter)
+        )
+
+    elif function == OtherSpacesEnum.power_spec:
+        a = matlab_to_ndarray(
+            matlab_engine_.extract_lfcc_edited(
+                data_list_mat,
+                float(sample_rate),
+                float(cepstral_window_length_ms),
+                float(num_fft),
+                float(num_fcc),
+                nargout=5,
             )[
                 -1
             ]  # (speech,Fs,Window_Length,NFFT,No_Filter)
-        ).T
+        )
+        return a
 
     raise Exception(f"{function} is not supported")
