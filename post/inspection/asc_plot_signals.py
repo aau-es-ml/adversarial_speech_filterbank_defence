@@ -13,7 +13,12 @@ from typing import Sequence
 import librosa
 import numpy
 from draugr.scipy_utilities import read_normalised_wave, write_normalised_wave
-from draugr.visualisation import FigureSession, SubplotSession, fix_edge_gridlines
+from draugr.visualisation import (
+    FigureSession,
+    SubplotSession,
+    fix_edge_gridlines,
+    save_pdf_embed_fig,
+)
 from librosa.display import specshow
 from matplotlib import pyplot
 
@@ -127,7 +132,7 @@ if __name__ == "__main__":
                             f"{AdversarialSpeechDataset._categories[file_label]} {file_.stem}.All"
                         )
 
-                        pyplot.savefig(f"{a_path}.svg")
+                        save_pdf_embed_fig(f"{a_path}.pdf")
                         write_normalised_wave(f"{a_path}.wav", sampling_rate, wav_data)
                     with FigureSession():
                         specshow(
@@ -153,7 +158,7 @@ if __name__ == "__main__":
                         pyplot.xlabel("Time (seconds)")
                         pyplot.ylabel("Frequency (Hz)")
                         pyplot.tight_layout()
-                        pyplot.savefig(f"{a_path}_librosa_spec.svg")
+                        save_pdf_embed_fig(f"{a_path}_librosa_spec.pdf")
                     with SubplotSession(return_self=True) as sps:
                         img = specshow(
                             librosa.feature.mfcc(
@@ -172,7 +177,7 @@ if __name__ == "__main__":
                         )
                         sps.fig.colorbar(img, ax=sps.axs[0])
                         sps.axs[0].set(title="MFCC")
-                        pyplot.savefig(f"{a_path}_librosa_ceps.svg")
+                        save_pdf_embed_fig(f"{a_path}_librosa_ceps.pdf")
 
                     for ith_block in progress_bar(
                         range((data_len - block_window_size_ms) // block_step_size_ms)
@@ -190,7 +195,7 @@ if __name__ == "__main__":
                             pyplot.title(
                                 f"{AdversarialSpeechDataset._categories[file_label]} {file_.stem}.block{ith_block}"
                             )
-                            pyplot.savefig(f"{path}.svg")
+                            save_pdf_embed_fig(f"{path}.pdf")
                             write_normalised_wave(f"{path}.wav", sampling_rate, da)
                         with FigureSession():
                             specshow(
@@ -216,7 +221,7 @@ if __name__ == "__main__":
                             pyplot.xlabel("Time (seconds)")
                             pyplot.ylabel("Frequency (Hz)")
                             pyplot.tight_layout()
-                            pyplot.savefig(f"{path}_librosa_spec.svg")
+                            save_pdf_embed_fig(f"{path}_librosa_spec.pdf")
                         with SubplotSession(return_self=True) as sps:
                             img = specshow(
                                 librosa.feature.mfcc(
@@ -236,7 +241,7 @@ if __name__ == "__main__":
                             sps.fig.colorbar(img, ax=sps.axs[0])
                             sps.axs[0].set(title="MFCC")
                             # fix_edge_gridlines(sps.axs[0])
-                            pyplot.savefig(f"{path}_librosa_ceps.svg")
+                            save_pdf_embed_fig(f"{path}_librosa_ceps.pdf")
 
                         # if ith_block > max_files - 1:
                         #  break

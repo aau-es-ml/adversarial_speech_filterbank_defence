@@ -12,7 +12,7 @@ import numpy
 import torch
 
 from draugr.tqdm_utilities import progress_bar
-from draugr.visualisation import FigureSession
+from draugr.visualisation import FigureSession, save_pdf_embed_fig
 from matplotlib import pyplot
 from sklearn.manifold import TSNE
 from torch.utils.data import DataLoader, TensorDataset
@@ -24,7 +24,7 @@ from configs.path_config import (
     PROCESSED_FILE_ENDING,
     PROJECT_APP_PATH,
 )
-from configs.training_config import TRAINING_CONFIG
+from configs.training_config import COMMON_TRAINING_CONFIG
 from data import AdversarialSpeechBlockDataset
 from data.adversarial_speech_dataset import AdversarialSpeechDataset
 from draugr.torch_utilities import (
@@ -87,7 +87,7 @@ if __name__ == "__main__":
                                 to_tensor(predictors[:, numpy.newaxis, ...]),
                                 to_tensor(categories[:, numpy.newaxis]),
                             ),
-                            batch_size=TRAINING_CONFIG.projection_num_samples,
+                            batch_size=COMMON_TRAINING_CONFIG.projection_num_samples,
                             shuffle=True,
                             num_workers=0,
                             pin_memory=global_pin_memory(),
@@ -103,8 +103,8 @@ if __name__ == "__main__":
                                         *TSNE(
                                             n_components=2,
                                             random_state=0,
-                                            perplexity=TRAINING_CONFIG.tnse_perplexity,
-                                            learning_rate=TRAINING_CONFIG.tsne_learning_rate,
+                                            perplexity=COMMON_TRAINING_CONFIG.tnse_perplexity,
+                                            learning_rate=COMMON_TRAINING_CONFIG.tsne_learning_rate,
                                         ).fit_transform(
                                             torch.flatten(predictor_, start_dim=1)
                                             .cpu()
@@ -123,8 +123,8 @@ if __name__ == "__main__":
                                     ],
                                 )
                                 pyplot.title(f"{cepstral_name.value} {k}")
-                                pyplot.savefig(
-                                    embedding_path / f"{cepstral_name.value}_{k}.svg"
+                                save_pdf_embed_fig(
+                                    embedding_path / f"{cepstral_name.value}_{k}.pdf"
                                 )
                         # writer.embed('TSNE', X_embedded, label_img=predictors2.to("cpu").numpy()) # BORKED!
 

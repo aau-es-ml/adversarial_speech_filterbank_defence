@@ -11,14 +11,18 @@ from copy import deepcopy
 from itertools import product
 from pathlib import Path
 
+import torch
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from warg import import_warning, NOD
 
 __all__ = ["EXPERIMENTS"]
 
+from configs.misc_config import NOISES, SNR_RATIOS
+
 import_warning(Path(__file__).with_suffix("").name)
 
 from draugr.numpy_utilities import Split
-
+from warg import GDKC
 from configs.path_config import (
     DATA_NOISED_PROCESSED_PATH,
     DATA_REGULAR_PROCESSED_PATH,
@@ -26,8 +30,11 @@ from configs.path_config import (
 )
 from data.persistence_helper import extract_tuple_from_path
 
-STRENGTHS = range(0, 20 + 1, 5)  # [0,5,10,15,20]
-NOISES = ("10m_10f_ssn", "5m_5f_babble", "TBUS", "SPSQUARE", "PCAFETER", "DKITCHEN")
+DEFAULT_NUM_EPOCHS = 99
+DEFAULT_OPTIMISER_SPEC = GDKC(
+    constructor=torch.optim.Adam, lr=6e-4, betas=(0.9, 0.999,),
+)
+# DEFAULT_SCHEDULER_SPEC = GDKC(constructor=ReduceLROnPlateau) # scheduler.step(val_loss) # TODO: UNUSED, not using SGD
 
 DEFAULT_DISTRIBUTION = NOD(
     num_samples=None,
@@ -91,7 +98,7 @@ NOISED_SSS = {
                 **FULL_VAL_DISTRIBUTION,
             ),
         }
-        for noise_type, strength in product(NOISES, STRENGTHS)
+        for noise_type, strength in product(NOISES, SNR_RATIOS)
     ]
     for k, v in e.items()
 }
@@ -130,11 +137,15 @@ TRUNCATED_SPLITS = {
         Train_Sets={"speech": (TRUNCATED_A_SPEECH,)},
         Validation_Sets={"speech": (TRUNCATED_A_SPEECH,)},
         Test_Sets={"speech": (TRUNCATED_A_SPEECH,), "silence": (TRUNCATED_A_SILENCE,),},
+        Num_Epochs=DEFAULT_NUM_EPOCHS,
+        Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
     ),
     f"TRUNCATED_A_silence": NOD(  # Model_A_silence
         Train_Sets={"silence": (TRUNCATED_A_SILENCE,)},
         Validation_Sets={"silence": (TRUNCATED_A_SILENCE,)},
         Test_Sets={"speech": (TRUNCATED_A_SPEECH,), "silence": (TRUNCATED_A_SILENCE,),},
+        Num_Epochs=DEFAULT_NUM_EPOCHS,
+        Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
     ),
 }
 TRUNCATED_SETS = {
@@ -142,11 +153,15 @@ TRUNCATED_SETS = {
         Train_Sets={"A": (TRUNCATED_A,)},
         Validation_Sets={"A": (TRUNCATED_A,)},
         Test_Sets={"A": (TRUNCATED_A,), "B": (TRUNCATED_B,)},
+        Num_Epochs=DEFAULT_NUM_EPOCHS,
+        Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
     ),
     f"TRUNCATED_B": NOD(  # Model_B
         Train_Sets={"B": (TRUNCATED_B,)},
         Validation_Sets={"B": (TRUNCATED_B,)},
         Test_Sets={"A": (TRUNCATED_A,), "B": (TRUNCATED_B,)},
+        Num_Epochs=DEFAULT_NUM_EPOCHS,
+        Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
     ),
 }
 
@@ -155,6 +170,8 @@ MERGED_SETS = NOD(
         Train_Sets={"AB": (A, B)},
         Validation_Sets={"AB": (A, B)},
         Test_Sets={"AB": (A, B), "A": (A,), "B": (B,)},
+        Num_Epochs=DEFAULT_NUM_EPOCHS,
+        Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
     ),
 )
 
@@ -169,12 +186,14 @@ NO_AUG_TO_NOISE = {
                     f"{noise_type}_SNR_{strength}dB": (
                         NOISED_SSS[f"{noise_type}_SNR_{strength}dB_test"],
                     )
-                    for strength in STRENGTHS
+                    for strength in SNR_RATIOS
                 }
                 for noise_type in NOISES
             ]
             for k, v in e.items()
         },
+        Num_Epochs=DEFAULT_NUM_EPOCHS,
+        Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
     )
 }
 
@@ -204,55 +223,57 @@ NOISED_SETS = {
                 #    )
                 #    for noise_type1, strength1 in product(NOISES, STRENGTHS) #TODO: DO not test across
                 # },
+                Num_Epochs=DEFAULT_NUM_EPOCHS,
+                Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
             )
         }
-        for noise_type, strength in product(NOISES, STRENGTHS)
+        for noise_type, strength in product(NOISES, SNR_RATIOS)
     ]
     for k, v in e.items()
 }
 
-
+# NOISES_TO_CAF_OPT_SPEC = deepcopy(DEFAULT_OPTIMISER_SPEC)
+# NOISES_TO_CAF_OPT_SPEC.lr =1e-4
 NOISES_TO_CAF = {
     f"NOISES_ALL_SNR_to_PCAFETER": NOD(
         Train_Sets={
-            k: v
-            for e in [
-                {
-                    f"{noise_type}_SNR_{strength}dB": (
-                        NOISED_SSS[f"{noise_type}_SNR_{strength}dB_train"],
-                    )
-                    for strength in STRENGTHS
-                }
-                for noise_type in [n for n in NOISES if n != "PCAFETER"]
+            "ALL_NOISE_SNR": [
+                NOISED_SSS[f"{noise_type}_SNR_{strength}dB_train"]
+                for strength, noise_type in product(SNR_RATIOS, NOISES)
+                if noise_type != "PCAFETER"
             ]
-            for k, v in e.items()
         },
         Validation_Sets={
-            k: v
-            for e in [
-                {
-                    f"{noise_type}_SNR_{strength}dB": (
-                        NOISED_SSS[f"{noise_type}_SNR_{strength}dB_validation"],
-                    )
-                    for strength in STRENGTHS
-                }
-                for noise_type in [n for n in NOISES if n != "PCAFETER"]
+            "ALL_NOISE_SNR": [
+                NOISED_SSS[f"{noise_type}_SNR_{strength}dB_validation"]
+                for strength, noise_type in product(SNR_RATIOS, NOISES)
+                if noise_type != "PCAFETER"
             ]
-            for k, v in e.items()
         },
         Test_Sets={
-            k: v
-            for e in [
-                {
-                    f"{noise_type}_SNR_{strength}dB": (
-                        NOISED_SSS[f"{noise_type}_SNR_{strength}dB_test"],
-                    )
-                    for strength in STRENGTHS
-                }
-                for noise_type in ("PCAFETER",)
-            ]
-            for k, v in e.items()
+            **{
+                k: v
+                for e in [
+                    {
+                        f"{noise_type}_SNR_{strength}dB": (
+                            NOISED_SSS[f"{noise_type}_SNR_{strength}dB_test"],
+                        )
+                        for strength in SNR_RATIOS
+                    }
+                    for noise_type in ("PCAFETER",)
+                ]
+                for k, v in e.items()
+            },
+            **{
+                "PCAFETER_ALL_SNR": [
+                    NOISED_SSS[f"{noise_type}_SNR_{strength}dB_test"]
+                    for strength, noise_type in product(SNR_RATIOS, NOISES)
+                    if noise_type == "PCAFETER"
+                ]
+            },
         },
+        Num_Epochs=DEFAULT_NUM_EPOCHS,
+        Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
     )
 }
 
@@ -260,10 +281,11 @@ EXPERIMENTS = NOD(
     **TRUNCATED_SETS,
     **MERGED_SETS,
     **TRUNCATED_SPLITS,
-    **NOISED_SETS,
-    **NO_AUG_TO_NOISE,
-    **NOISES_TO_CAF,
+    # **NO_AUG_TO_NOISE,
+    # **NOISES_TO_CAF,
+    # **NOISED_SETS,
 )
 
 if __name__ == "__main__":
-    print(EXPERIMENTS.keys())
+    # print(EXPERIMENTS.keys())
+    print(NOISES_TO_CAF["NOISES_ALL_SNR_to_PCAFETER"]["Test_Sets"])

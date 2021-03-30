@@ -8,7 +8,7 @@ __doc__ = r"""
            """
 
 from .asc_extract_csv import extract_metrics
-from .asc_plot_agg import compute_agg_plots
+from .asc_export_agg import compute_agg_plots
 
 
 def run_all_postcomputations():

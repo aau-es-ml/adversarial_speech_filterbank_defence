@@ -99,7 +99,7 @@ elif function == CepstralSpaceEnum.fourier_bessel_cc:
         function == CepstralSpaceEnum.gammatone_fcc
         or function == CepstralSpaceEnum.inverse_gfcc
     ):
-        filterbank = numpy.matrix(
+        filterbank = matlab_to_ndarray(  # numpy MATRIX
             matlab_engine_.fft2gammatonemx(
                 float(num_fft),
                 float(sample_rate),
@@ -113,7 +113,8 @@ elif function == CepstralSpaceEnum.fourier_bessel_cc:
                 0
             ]  # (nfft, sr, nfilts, width, minfreq, maxfreq, maxlen)
         )
-        filterbank = filterbank.getH()
+        # filterbank = filterbank.getH() # Hermitian conjugate
+        filterbank = filterbank.conj().T  # Hermitian conjugate
 
         if function == CepstralSpaceEnum.inverse_gfcc:
             filterbank = filterbank[::-1]  # reverse the filterbank

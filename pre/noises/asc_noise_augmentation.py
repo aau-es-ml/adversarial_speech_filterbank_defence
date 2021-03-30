@@ -9,6 +9,8 @@ from neodroidaudition.noise_generation.additive_noise import (
 from scipy.io import wavfile
 
 from apppath import ensure_existence
+
+from configs.misc_config import SNR_RATIOS
 from configs.path_config import (
     DATA_ROOT_NOISED_UNPROCESSED_PATH,
     DATA_ROOT_PATH,
@@ -25,7 +27,7 @@ RUN_PARALLEL = False  # REQUIRES LOTS OF RAM!!!!
 
 
 def aug_func(
-    normal_example_file, packed: Tuple[Iterable[Path], Iterable[Path], Path, bool]
+    normal_example_file, packed: Tuple[Iterable[Path], Iterable[Path], Path, bool, bool]
 ):
     adv_files, noise_files, out_dir, parallel, skip_if_exists = packed
 
@@ -49,6 +51,7 @@ def aug_func(
                 out_dir=out_dir,
                 category="normal",
                 noise_file=noise_file,
+                snrs=SNR_RATIOS,
             )
 
     if parallel:
@@ -76,12 +79,12 @@ def adv_noise_aug_func(
     adv_example_file, packed: Tuple[Iterable[Path], Path, numpy.ndarray, Path]
 ) -> None:
     """
-  SLOW AND INEFFICIENT!
+SLOW AND INEFFICIENT!
 
-  :param adv_example_file:
-  :param packed:
-  :return:
-  """
+:param adv_example_file:
+:param packed:
+:return:
+"""
     noise_files, normal_example_file, clean_rvad_mask, out_dir = packed
     if (
         normal_example_file.name.split("-")[-1] in adv_example_file.name.split("-")[-1]
@@ -100,11 +103,12 @@ def adv_noise_aug_func(
                     out_dir=out_dir,
                     category="adv",
                     noise_file=noise_file,
+                    snrs=SNR_RATIOS,
                 )
 
 
 def compute_noise_augmented_samples(
-    parallel: bool = True, skip_if_exists: bool = True, subsets: bool = Split
+    parallel: bool = True, skip_if_exists: bool = True, subsets: Split = Split
 ):
     if True:
         for ss in progress_bar(("A",), disable=RUN_PARALLEL):
@@ -129,48 +133,56 @@ def compute_noise_augmented_samples(
                 ),
                 disable=RUN_PARALLEL,
             ):
-                if split not in subsets:
-                    print(f"Skipping subset {split}")
-                    continue
-                noise_files = list(
-                    (NOISES_SPLIT_UNPROCESSED_ROOT_PATH / split.value).rglob("*.wav")
-                )
-                # noise_files = [nf for nf in noise_files if 'm_' in nf.name]  # TODO: Remove
-                # assert len(noise_files) == 2  # TODO: Remove
-                normal_files_split = numpy.array(normal_files)[nf_indices]
-                adv_files_split = numpy.array(adv_files)[af_indices]
-                out_dir_split = out_dir / split.value
+                if split in subsets:
 
-                if parallel:
-                    parallel_umap(
-                        aug_func,
-                        normal_files_split,
-                        func_kws=dict(
-                            adv_files=adv_files_split,
-                            noise_files=noise_files,
-                            out_dir=out_dir_split,
-                            parallel=False,  # deamonic process cannot have children
-                            skip_if_exists=skip_if_exists,
-                        ),
+                    noise_files = list(
+                        (NOISES_SPLIT_UNPROCESSED_ROOT_PATH / split.value).rglob(
+                            "*.wav"
+                        )
                     )
-                else:
-                    for normal_example_file in progress_bar(
-                        normal_files_split, disable=RUN_PARALLEL
-                    ):
-                        aug_func(
-                            normal_example_file,
-                            packed=(
-                                adv_files_split,
-                                noise_files,
-                                out_dir_split,
-                                parallel,
-                                skip_if_exists,
+                    # noise_files = [nf for nf in noise_files if 'm_' in nf.name]  # TODO: Remove
+                    # assert len(noise_files) == 2  # TODO: Remove
+                    normal_files_split = numpy.array(normal_files)[nf_indices]
+                    adv_files_split = numpy.array(adv_files)[af_indices]
+                    out_dir_split = out_dir / split.value
+
+                    if parallel:
+                        parallel_umap(
+                            aug_func,
+                            normal_files_split,
+                            func_kws=dict(
+                                adv_files=adv_files_split,
+                                noise_files=noise_files,
+                                out_dir=out_dir_split,
+                                parallel=False,  # deamonic process cannot have children
+                                skip_if_exists=skip_if_exists,
                             ),
                         )
+                    else:
+                        for normal_example_file in progress_bar(
+                            normal_files_split, disable=RUN_PARALLEL
+                        ):
+                            aug_func(
+                                normal_example_file,
+                                packed=(
+                                    adv_files_split,
+                                    noise_files,
+                                    out_dir_split,
+                                    parallel,
+                                    skip_if_exists,
+                                ),
+                            )
+                else:
+                    print(f"Skipping subset {split}")
 
 
 if __name__ == "__main__":
 
     compute_noise_augmented_samples(
-        parallel=RUN_PARALLEL, subsets=(Split.Validation, Split.Testing)
+        parallel=RUN_PARALLEL,
+        # subsets=(
+        # Split.Training,
+        # Split.Validation,
+        # Split.Testing
     )
+    # )

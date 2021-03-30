@@ -18,6 +18,7 @@ NOISES_UNPROCESSED_ROOT_PATH = (
     Path.home() / "Data" / "Audio" / "noises" / "AuroraNoises"
 )
 DEMAND_NOISES = Path().home() / "Data" / "Audio" / "noises" / "demand_subset"
+MORTEN_NOISES = Path().home() / "Data" / "Audio" / "kolbek_slt2016"
 
 GENERATED_NOISES_UNPROCESSED_ROOT_PATH = (
     PROJECT_APP_PATH.user_data / "unprocessed" / "generated_noises"

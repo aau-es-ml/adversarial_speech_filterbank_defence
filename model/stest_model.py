@@ -47,14 +47,13 @@ from configs import (
     MODEL_PERSISTENCE_PATH,
     PROCESSED_FILE_ENDING,
     PROJECT_APP_PATH,
-    TRAINING_CONFIG,
+    COMMON_TRAINING_CONFIG,
 )
 from data import (
     AdversarialSpeechBlockDataset,
     export_results_numpy,
     misclassified_names,
 )
-
 
 __all__ = ["run_all_experiment_test"]
 
@@ -91,7 +90,7 @@ def separate_test(
                         num_samples=t.num_samples,
                         return_names=True,
                     ),
-                    batch_size=TRAINING_CONFIG["batch_size"],
+                    batch_size=COMMON_TRAINING_CONFIG["batch_size"],
                     shuffle=False,
                     num_workers=num_workers,
                     pin_memory=global_pin_memory(num_workers),
@@ -111,8 +110,10 @@ def separate_test(
                         for (ith_batch, (predictors, category, names)) in enumerate(
                             test_loader
                         ):
-                            predictors = predictors.to(device=device)
-                            category = category.to(device=device)
+                            predictors = to_tensor(
+                                predictors, device=device, dtype=float
+                            )
+                            category = to_tensor(category, device=device, dtype=float)
                             predictions += torch.sigmoid(model(predictors))
                             truth += category
                             test_names += names
@@ -229,7 +230,7 @@ def merged_test(
 
             test_loader = DataLoader(
                 TensorDataset(predictors, categories),
-                batch_size=TRAINING_CONFIG["batch_size"],
+                batch_size=COMMON_TRAINING_CONFIG["batch_size"],
                 shuffle=False,
                 num_workers=num_workers,
                 pin_memory=global_pin_memory(num_workers),
@@ -246,6 +247,7 @@ def merged_test(
                     for (ith_batch, (predictors, category)) in enumerate(
                         to_device_iterator(test_loader, device=device)
                     ):
+                        predictors = to_tensor(predictors, device=device, dtype=float)
                         predictions += torch.sigmoid(model(predictors))
                         truth += category
 
@@ -351,8 +353,8 @@ def run_all_experiment_test(
                             / f"{cepstral_name.value}"
                         ).rglob("best_val_model_params.pt")
                     )
-                    if not len(model_runs):
-                        error("no model runs found")
+                    if not len(model_runs) and False:
+                        error("no model runs found, run training first")
                         exit(-1)
 
                     for model_path in progress_bar(

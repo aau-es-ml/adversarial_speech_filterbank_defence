@@ -138,7 +138,7 @@ if __name__ == "__main__":
                             for names_id1 in progress_bar(rep_entries):
                                 if names_id1 in test_names[idx]:
                                     # print(f'hit! {names_id1} {test_names[idx]}')
-                                    with SubplotSession(figsize=(10, 10)) as a:
+                                    with SubplotSession() as a:
                                         fig, (ax, *_) = a
                                         if (
                                             transformation
@@ -263,14 +263,14 @@ if __name__ == "__main__":
                                         pyplot.title(
                                             f"{transformation.value} {test_names[idx]} {ds_.idx_to_str(categories[idx])}"
                                         )
-                                        pyplot.savefig(
+                                        save_pdf_embed_fig(
                                             ensure_existence(
                                                 embedding_path
                                                 / names_id1
                                                 / "trans"
                                                 / test_names[idx].split(".")[0]
                                             )
-                                            / f"{transformation.value}_{test_names[idx]}.svg"
+                                            / f"{transformation.value}_{test_names[idx]}.pdf"
                                         )
                 else:
                     raise FileNotFoundError

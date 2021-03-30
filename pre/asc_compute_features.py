@@ -36,7 +36,6 @@ VERY SLOW!
 TODO: parallelise
 """
 
-
 MATLAB_ENGINE = start_engine()
 matlab_files_path = str(
     # Path.cwd()
@@ -196,10 +195,9 @@ def block_wise_feature_extraction(
 :param max_files:
 :param verbose:
 :return:"""
-    if True:
 
-        print(f"Cd.ing to: {matlab_files_path}")
-        MATLAB_ENGINE.cd(matlab_files_path)
+    print(f"Cd.ing to: {matlab_files_path}")
+    MATLAB_ENGINE.cd(matlab_files_path)
 
     file_paths, categories = AdversarialSpeechDataset(
         source_path
@@ -364,6 +362,7 @@ def compute_dataset_features(
         data_path = root_path / data_s
         out_path = processed_path / part_id
         if skip_if_existing_dir and out_path.exists():
+            print(f"skipping {out_path}")
             continue
         ensure_existence(out_path)
 
@@ -371,6 +370,8 @@ def compute_dataset_features(
             if (
                 skip_if_existing_file and (out_path / f"{fe.value}_{part_id}").exists()
             ):  # LEAKY name but works for now
+                a = out_path / f"{fe.value}_{part_id}"
+                print(f"skipping {a}")
                 continue
             if block_wise:
                 block_wise_feature_extraction(
@@ -519,63 +520,51 @@ def compute_noised_dataset_features(
             for data_split in progress_bar(data_set.iterdir()):
                 if data_split.is_dir():
                     for snr in progress_bar(data_split.iterdir()):
-
-                        if True:  # TODO: DISABLE! NARROW SELLECTION
-                            if (
-                                data_split.name != "training" or snr.name != "no_aug"
-                            ):  # validation
-                                print("skip")
+                        if data_split.is_dir():
+                            out_path = processed_path / Path(
+                                *(data_set.name, data_split.name, snr.name)
+                            )
+                            if skip_if_existing_dir and out_path.exists():
                                 continue
-                            else:
-                                print(snr)
-
-                        if True:
-                            if data_split.is_dir():
-                                out_path = processed_path / Path(
-                                    *(data_set.name, data_split.name, snr.name)
-                                )
-                                if skip_if_existing_dir and out_path.exists():
+                            ensure_existence(out_path)
+                            for fe in progress_bar(transformations):
+                                out_id = snr.name
+                                if (
+                                    skip_if_existing_file
+                                    and (out_path / f"{fe.value}_{out_id}").exists()
+                                ):
                                     continue
-                                ensure_existence(out_path)
-                                for fe in progress_bar(transformations):
-                                    out_id = snr.name
-                                    if (
-                                        skip_if_existing_file
-                                        and (out_path / f"{fe.value}_{out_id}").exists()
-                                    ):
-                                        continue
-                                    if block_wise:
-                                        block_wise_feature_extraction(
-                                            fe,
-                                            snr,
-                                            save_to_disk=True,
-                                            out_path=out_path,
-                                            out_id=out_id,
-                                            block_window_size=block_window_size_ms,
-                                            block_window_step_size=block_window_step_size_ms,
-                                            n_fcc=n_fcc,
-                                            n_fft=n_fft,
-                                            cepstral_window_length_ms=cepstral_window_length_ms,
-                                        )
-                                    else:
-                                        file_wise_feature_extraction(
-                                            fe,
-                                            snr,
-                                            save_to_disk=True,
-                                            out_path=out_path,
-                                            out_id=out_id,
-                                            n_fcc=n_fcc,
-                                            n_fft=n_fft,
-                                            cepstral_window_length_ms=cepstral_window_length_ms,
-                                        )
+                                if block_wise:
+                                    block_wise_feature_extraction(
+                                        fe,
+                                        snr,
+                                        save_to_disk=True,
+                                        out_path=out_path,
+                                        out_id=out_id,
+                                        block_window_size=block_window_size_ms,
+                                        block_window_step_size=block_window_step_size_ms,
+                                        n_fcc=n_fcc,
+                                        n_fft=n_fft,
+                                        cepstral_window_length_ms=cepstral_window_length_ms,
+                                    )
+                                else:
+                                    file_wise_feature_extraction(
+                                        fe,
+                                        snr,
+                                        save_to_disk=True,
+                                        out_path=out_path,
+                                        out_id=out_id,
+                                        n_fcc=n_fcc,
+                                        n_fft=n_fft,
+                                        cepstral_window_length_ms=cepstral_window_length_ms,
+                                    )
 
 
 def compute_transformations(
     compu_reg=True,
     compu_ss=True,
     compu_noised=True,
-    transformations: Sequence = (*CepstralSpaceEnum, OtherSpacesEnum.short_term_ft),
-    # transformations=[FuncEnum.mel_fcc]
+    transformations: Sequence = (*CepstralSpaceEnum,),
     block_window_size_ms=512,  # 512,  # 128
     block_window_step_size_ms=512,  # 512,  # 128
     n_fcc=20,  # 40, # 20
@@ -640,10 +629,6 @@ if __name__ == "__main__":
         compu_reg=False,
         compu_ss=False,
         compu_noised=True,
-        skip_if_existing_file=False,
-        transformations=[
-            # OtherSpacesEnum.short_term_ft,
-            OtherSpacesEnum.power_spec,
-            # CepstralSpaceEnum.linear_fcc
-        ],
+        skip_if_existing_file=True,
+        transformations=[*OtherSpacesEnum, *CepstralSpaceEnum],
     )

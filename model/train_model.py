@@ -62,49 +62,33 @@ def train_asc(
     out_path,
     input_size,
     validation_interval,
-    learning_rate,
-    adam_betas,
+    optimiser_spec,
     num_epochs,
     device: Device = global_torch_device(),
 ) -> None:
     """
 
-    :param writer:
-    :param train_loader:
-    :param val_loader:
-    :param cfg_name:
-    :param out_path:
-    :param input_size:
-    :param validation_interval:
-    :param learning_rate:
-    :param adam_betas:
-    :param num_epochs:
-    :param device:"""
+  :param writer:
+  :param train_loader:
+  :param val_loader:
+  :param cfg_name:
+  :param out_path:
+  :param input_size:
+  :param validation_interval:
+  :param learning_rate:
+  :param adam_betas:
+  :param num_epochs:
+  :param device:"""
     model = AdversarialSignalClassifier(*input_size).to(device)
     criterion = torch.nn.BCEWithLogitsLoss()
-    optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate, betas=adam_betas)
+    optimiser = optimiser_spec(model.parameters())
     best_val = math.inf
     for ith_epoch in progress_bar(
-        range(num_epochs), description=f"{cfg_name}", leave=False
+        range(num_epochs + 1), description=f"{cfg_name}", leave=False
     ):
-        accum_loss = 0.0
-        with TorchTrainSession(model):
-            for ith_batch, (predictors, category) in progress_bar(
-                enumerate(to_device_iterator(train_loader, device=device), 1),
-                description=f"Train Batch #",
-            ):
-                optimiser.zero_grad()  # Initialize the gradients to zero
-                loss = criterion(model(predictors), category)  # Forward
-                loss.backward()  # Back propagation
-                optimiser.step()  # Parameter update
-
-                accum_loss += to_scalar(loss)
-
-        writer.scalar(
-            TrainingScalars.training_loss.value, accum_loss / ith_batch, ith_epoch
-        )
 
         if ith_epoch % validation_interval == 0:
+            writer.parameters(model, ith_epoch)
             loss_accum_val = 0.0
             accuracy_accum_val = 0.0
             ps = []
@@ -122,7 +106,7 @@ def train_asc(
                         pred_s = torch.sigmoid(pred)
                         accuracy_accum_val += to_scalar(
                             ((pred_s > 0.5) == category_val).float().sum()
-                            / float(pred.shape[0])
+                            / float(pred_s.shape[0])
                         )
                         ts.append(category_val)
                         ps.append(pred_s)
@@ -148,6 +132,27 @@ def train_asc(
             else:
                 writer.scalar(TrainingScalars.new_best_model.value, 0, ith_epoch)
 
+        if ith_epoch < num_epochs:
+            accum_loss = 0.0
+            with TorchTrainSession(model):
+                for ith_batch, (predictors, category) in progress_bar(
+                    enumerate(to_device_iterator(train_loader, device=device), 1),
+                    description=f"Train Batch #",
+                ):
+                    optimiser.zero_grad()  # Initialize the gradients to zero
+                    loss = criterion(model(predictors), category)  # Forward
+                    loss.backward()  # Back propagation
+                    optimiser.step()  # Parameter update
+
+                    accum_loss += to_scalar(loss)
+
+            writer.scalar(
+                TrainingScalars.training_loss.value,
+                accum_loss
+                / ith_batch,  # ith_batch has the number of batches that was accumulated over
+                ith_epoch,
+            )
+
     torch.save(model.state_dict(), str(out_path / FINAL_MODEL_NAME))
 
     torch_clean_up()
@@ -163,10 +168,8 @@ def out_train_separate(
     val_sets,
     batch_size,
     val_interval,
-    learning_rate,
-    adam_beta1,
-    adam_beta2,
-    epochs,
+    optimiser_spec,
+    num_epochs,
 ):
     for tt in progress_bar(train_sets, description=f"{exp_name} train_set"):
         for (
@@ -229,9 +232,8 @@ def out_train_separate(
                             cfg_name=cepstral_name.value,
                             input_size=val_loader.dataset.__getitem__(0)[0].shape,
                             validation_interval=val_interval,
-                            learning_rate=learning_rate,
-                            adam_betas=(adam_beta1, adam_beta2,),
-                            num_epochs=epochs,
+                            optimiser_spec=optimiser_spec,
+                            num_epochs=num_epochs,
                         )
 
 
@@ -245,27 +247,25 @@ def out_train_merged(
     val_sets: Iterable,
     batch_size,
     val_interval,
-    learning_rate,
-    adam_beta1,
-    adam_beta2,
-    epochs,
+    optimiser_spec,
+    num_epochs,
 ):
     """
-    for training with merged datasets
+      for training with merged datasets
 
-    :param load_time:
-    :param exp_name:
-    :param cepstral_name:
-    :param ith_run:
-    :param train_sets:
-    :param PROCESSED_FILE_ENDING:
-    :param batch_size:
-    :param val_interval:
-    :param learning_rate:
-    :param adam_beta1:
-    :param adam_beta2:
-    :param epochs:
-    :return:"""
+      :param val_sets:
+      :param load_time:
+      :param exp_name:
+      :param cepstral_name:
+      :param ith_run:
+      :param train_sets:
+      :param batch_size:
+      :param val_interval:
+      :param learning_rate:
+      :param adam_beta1:
+      :param adam_beta2:
+      :param epochs:
+      :return:"""
     model_id_path = (
         Path(load_time) / exp_name / f"{cepstral_name.value}" / f"seed_{ith_run}"
     )
@@ -274,7 +274,7 @@ def out_train_merged(
     with WorkerSession(0) as num_workers:
         with WorkerSession(0) as num_workers_val:
             with TensorBoardPytorchWriter(
-                LOG_PATH / model_id_path, verbose=False,
+                LOG_PATH / model_id_path, verbose=False
             ) as writer:
                 predictors_train = []
                 categories_train = []
@@ -370,13 +370,12 @@ def out_train_merged(
                     cfg_name=cepstral_name.value,
                     input_size=(1, x_height, x_width),
                     validation_interval=val_interval,
-                    learning_rate=learning_rate,
-                    adam_betas=(adam_beta1, adam_beta2,),
-                    num_epochs=epochs,
+                    optimiser_spec=optimiser_spec,
+                    num_epochs=num_epochs,
                 )
 
 
-def run_all_experiment_train():
+def run_all_experiment_train(spaces: Iterable = CepstralSpaceEnum):
     info(f"torch.cuda.is_available{torch.cuda.is_available()}")
 
     if torch.cuda.is_available():
@@ -389,14 +388,15 @@ def run_all_experiment_train():
 
     load_time = str(int(time.time()))
 
-    from configs.training_config import TRAINING_CONFIG
+    from configs.training_config import COMMON_TRAINING_CONFIG
 
-    for cepstral_name in progress_bar(CepstralSpaceEnum, description=f"# Cepstral"):
+    for cepstral_name in progress_bar(spaces, description=f"# Cepstral"):
         for exp_name, exp_v in progress_bar(
             EXPERIMENTS, description=f"{cepstral_name}"
         ):
             for ith_run in progress_bar(
-                range(TRAINING_CONFIG.num_runs), description=f"{exp_name}, seed #"
+                range(COMMON_TRAINING_CONFIG.num_runs),
+                description=f"{exp_name}, seed #",
             ):
                 seed_stack(ith_run)
                 for (k, v), (k2, v2) in zip(
@@ -412,12 +412,10 @@ def run_all_experiment_train():
                             ith_run=ith_run,
                             train_sets=v,
                             val_sets=v2,
-                            batch_size=TRAINING_CONFIG.batch_size,
-                            val_interval=TRAINING_CONFIG.val_interval,
-                            learning_rate=TRAINING_CONFIG.learning_rate,
-                            adam_beta1=TRAINING_CONFIG.adam_beta1,
-                            adam_beta2=TRAINING_CONFIG.adam_beta2,
-                            epochs=TRAINING_CONFIG.epochs,
+                            batch_size=COMMON_TRAINING_CONFIG.batch_size,
+                            val_interval=COMMON_TRAINING_CONFIG.val_interval,
+                            optimiser_spec=exp_v.Optimiser_Spec,
+                            num_epochs=exp_v.Num_Epochs,
                         )
                     else:
                         out_train_separate(
@@ -427,15 +425,15 @@ def run_all_experiment_train():
                             ith_run=ith_run,
                             train_sets=v,
                             val_sets=v2,
-                            batch_size=TRAINING_CONFIG.batch_size,
-                            val_interval=TRAINING_CONFIG.val_interval,
-                            learning_rate=TRAINING_CONFIG.learning_rate,
-                            adam_beta1=TRAINING_CONFIG.adam_beta1,
-                            adam_beta2=TRAINING_CONFIG.adam_beta2,
-                            epochs=TRAINING_CONFIG.epochs,
+                            batch_size=COMMON_TRAINING_CONFIG.batch_size,
+                            val_interval=COMMON_TRAINING_CONFIG.val_interval,
+                            optimiser_spec=exp_v.Optimiser_Spec,
+                            num_epochs=exp_v.Num_Epochs,
                         )
 
 
 if __name__ == "__main__":
 
-    run_all_experiment_train()
+    run_all_experiment_train(
+        # spaces = (CepstralSpaceEnum.linear_fcc,)
+    )

@@ -14,7 +14,7 @@ from matplotlib import pyplot
 from torch.utils.data import DataLoader, TensorDataset
 
 from configs.path_config import PROCESSED_FILE_ENDING
-from configs.training_config import TRAINING_CONFIG
+from configs.training_config import COMMON_TRAINING_CONFIG
 from data import AdversarialSpeechBlockDataset
 from configs.experiment_config import EXPERIMENTS
 from draugr.torch_utilities import (
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
         for cepstral_name in progress_bar(CepstralSpaceEnum, description="configs #"):
             for exp_name, exp_v in progress_bar(
-                TRAINING_CONFIG.EXPERIMENTS, description=f"{cepstral_name}"
+                COMMON_TRAINING_CONFIG.EXPERIMENTS, description=f"{cepstral_name}"
             ):
 
                 predictors = []
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
                 test_loader = DataLoader(
                     TensorDataset(predictors, categories, indices),
-                    batch_size=TRAINING_CONFIG.batch_size,
+                    batch_size=COMMON_TRAINING_CONFIG.batch_size,
                     shuffle=False,
                     num_workers=0,
                     pin_memory=global_pin_memory(),
