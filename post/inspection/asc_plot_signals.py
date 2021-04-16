@@ -158,7 +158,7 @@ if __name__ == "__main__":
                         pyplot.xlabel("Time (seconds)")
                         pyplot.ylabel("Frequency (Hz)")
                         pyplot.tight_layout()
-                        save_pdf_embed_fig(f"{a_path}_librosa_spec.pdf")
+                        save_pdf_embed_fig(f"{a_path}_librosa_stft.pdf")
                     with SubplotSession(return_self=True) as sps:
                         img = specshow(
                             librosa.feature.mfcc(
@@ -176,8 +176,8 @@ if __name__ == "__main__":
                             cmap="gray_r",
                         )
                         sps.fig.colorbar(img, ax=sps.axs[0])
-                        sps.axs[0].set(title="MFCC")
-                        save_pdf_embed_fig(f"{a_path}_librosa_ceps.pdf")
+                        # sps.axs[0].set(title="MFCC")
+                        save_pdf_embed_fig(f"{a_path}_librosa_mfcc.pdf")
 
                     for ith_block in progress_bar(
                         range((data_len - block_window_size_ms) // block_step_size_ms)
@@ -221,7 +221,7 @@ if __name__ == "__main__":
                             pyplot.xlabel("Time (seconds)")
                             pyplot.ylabel("Frequency (Hz)")
                             pyplot.tight_layout()
-                            save_pdf_embed_fig(f"{path}_librosa_spec.pdf")
+                            save_pdf_embed_fig(f"{path}_librosa_stft.pdf")
                         with SubplotSession(return_self=True) as sps:
                             img = specshow(
                                 librosa.feature.mfcc(
@@ -239,9 +239,9 @@ if __name__ == "__main__":
                                 cmap="gray_r",
                             )
                             sps.fig.colorbar(img, ax=sps.axs[0])
-                            sps.axs[0].set(title="MFCC")
+                            # sps.axs[0].set(title="MFCC")
                             # fix_edge_gridlines(sps.axs[0])
-                            save_pdf_embed_fig(f"{path}_librosa_ceps.pdf")
+                            save_pdf_embed_fig(f"{path}_librosa_mfcc.pdf")
 
                         # if ith_block > max_files - 1:
                         #  break

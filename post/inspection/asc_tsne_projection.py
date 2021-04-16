@@ -7,7 +7,6 @@ __doc__ = r"""
            Created on 22/06/2020
            """
 
-
 import numpy
 import torch
 
@@ -67,66 +66,72 @@ if __name__ == "__main__":
                     ),
                     False,
                 ) as writer:
-                    for k, t in exp_v.Train_Sets.items():
-                        seed_stack(0)
+                    for k, t_ in exp_v.Train_Sets.items():
+                        for t in t_.values():
+                            seed_stack(0)
 
-                        (predictors, categories, nt) = AdversarialSpeechBlockDataset(
-                            t.path
-                            / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
-                            split=Split.Training,
-                            random_seed=0,
-                            train_percentage=1.0,
-                            test_percentage=0,
-                            validation_percentage=0,
-                            shuffle_data=True,
-                            num_samples=None,
-                        ).get_all_samples_in_split()
+                            (
+                                predictors,
+                                categories,
+                                nt,
+                            ) = AdversarialSpeechBlockDataset(
+                                t.path
+                                / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
+                                split=Split.Training,
+                                random_seed=0,
+                                train_percentage=1.0,
+                                test_percentage=0,
+                                validation_percentage=0,
+                                shuffle_data=True,
+                                num_samples=None,
+                            ).get_all_samples_in_split()
 
-                        test_loader = DataLoader(
-                            TensorDataset(
-                                to_tensor(predictors[:, numpy.newaxis, ...]),
-                                to_tensor(categories[:, numpy.newaxis]),
-                            ),
-                            batch_size=COMMON_TRAINING_CONFIG.projection_num_samples,
-                            shuffle=True,
-                            num_workers=0,
-                            pin_memory=global_pin_memory(),
-                        )
-
-                        with torch.no_grad():
-                            (predictor_, category_) = next(
-                                iter(to_device_iterator(test_loader, device=device))
+                            test_loader = DataLoader(
+                                TensorDataset(
+                                    to_tensor(predictors[:, numpy.newaxis, ...]),
+                                    to_tensor(categories[:, numpy.newaxis]),
+                                ),
+                                batch_size=COMMON_TRAINING_CONFIG.projection_num_samples,
+                                shuffle=True,
+                                num_workers=0,
+                                pin_memory=global_pin_memory(),
                             )
-                            with FigureSession():
-                                scattr = pyplot.scatter(
-                                    *zip(
-                                        *TSNE(
-                                            n_components=2,
-                                            random_state=0,
-                                            perplexity=COMMON_TRAINING_CONFIG.tnse_perplexity,
-                                            learning_rate=COMMON_TRAINING_CONFIG.tsne_learning_rate,
-                                        ).fit_transform(
-                                            torch.flatten(predictor_, start_dim=1)
-                                            .cpu()
-                                            .numpy()
-                                        )
-                                    ),
-                                    c=category_.cpu().numpy(),
-                                    alpha=0.5,
-                                    s=2.0,
+
+                            with torch.no_grad():
+                                (predictor_, category_) = next(
+                                    iter(to_device_iterator(test_loader, device=device))
                                 )
-                                pyplot.legend(
-                                    handles=scattr.legend_elements()[0],
-                                    labels=[
-                                        c.value
-                                        for c in AdversarialSpeechDataset.DataCategories
-                                    ],
-                                )
-                                pyplot.title(f"{cepstral_name.value} {k}")
-                                save_pdf_embed_fig(
-                                    embedding_path / f"{cepstral_name.value}_{k}.pdf"
-                                )
-                        # writer.embed('TSNE', X_embedded, label_img=predictors2.to("cpu").numpy()) # BORKED!
+                                with FigureSession():
+                                    scattr = pyplot.scatter(
+                                        *zip(
+                                            *TSNE(
+                                                n_components=2,
+                                                random_state=0,
+                                                perplexity=COMMON_TRAINING_CONFIG.tnse_perplexity,
+                                                learning_rate=COMMON_TRAINING_CONFIG.tsne_learning_rate,
+                                            ).fit_transform(
+                                                torch.flatten(predictor_, start_dim=1)
+                                                .cpu()
+                                                .numpy()
+                                            )
+                                        ),
+                                        c=category_.cpu().numpy(),
+                                        alpha=0.5,
+                                        s=2.0,
+                                    )
+                                    pyplot.legend(
+                                        handles=scattr.legend_elements()[0],
+                                        labels=[
+                                            c.value
+                                            for c in AdversarialSpeechDataset.DataCategories
+                                        ],
+                                    )
+                                    pyplot.title(f"{cepstral_name.value} {k}")
+                                    save_pdf_embed_fig(
+                                        embedding_path
+                                        / f"{cepstral_name.value}_{k}.pdf"
+                                    )
+                            # writer.embed('TSNE', X_embedded, label_img=predictors2.to("cpu").numpy()) # BORKED!
 
             # break
 

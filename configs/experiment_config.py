@@ -278,12 +278,12 @@ NOISES_TO_CAF = {
 }
 
 EXPERIMENTS = NOD(
-    **TRUNCATED_SETS,
-    **MERGED_SETS,
-    **TRUNCATED_SPLITS,
+    # **TRUNCATED_SETS,
+    # **MERGED_SETS,
+    # **TRUNCATED_SPLITS,
     # **NO_AUG_TO_NOISE,
     # **NOISES_TO_CAF,
-    # **NOISED_SETS,
+    **NOISED_SETS,
 )
 
 if __name__ == "__main__":

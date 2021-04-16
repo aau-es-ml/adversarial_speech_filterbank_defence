@@ -8,7 +8,7 @@ __doc__ = r"""
            """
 
 from logging import info
-from typing import Iterable
+from typing import Iterable, Tuple
 
 from draugr.numpy_utilities import Split
 
@@ -22,6 +22,8 @@ from torch.types import Device
 from torch.utils.data import DataLoader, TensorDataset
 
 from apppath import ensure_existence
+from warg import GDKC
+
 from architectures.adversarial_signal_classifier import AdversarialSignalClassifier
 from configs.experiment_config import EXPERIMENTS
 from configs.path_config import (
@@ -56,32 +58,20 @@ __all__ = ["run_all_experiment_train"]
 def train_asc(
     writer: TensorBoardPytorchWriter,
     *,
-    train_loader,
-    val_loader,
-    cfg_name,
-    out_path,
-    input_size,
-    validation_interval,
-    optimiser_spec,
-    num_epochs,
+    train_loader: DataLoader,
+    val_loader: DataLoader,
+    cfg_name: str,
+    out_path: Path,
+    input_size: Tuple,
+    validation_interval: int,
+    optimiser_specification: GDKC,
+    num_epochs: int,
     device: Device = global_torch_device(),
 ) -> None:
-    """
 
-  :param writer:
-  :param train_loader:
-  :param val_loader:
-  :param cfg_name:
-  :param out_path:
-  :param input_size:
-  :param validation_interval:
-  :param learning_rate:
-  :param adam_betas:
-  :param num_epochs:
-  :param device:"""
     model = AdversarialSignalClassifier(*input_size).to(device)
     criterion = torch.nn.BCEWithLogitsLoss()
-    optimiser = optimiser_spec(model.parameters())
+    optimiser = optimiser_specification(model.parameters())
     best_val = math.inf
     for ith_epoch in progress_bar(
         range(num_epochs + 1), description=f"{cfg_name}", leave=False
@@ -232,7 +222,7 @@ def out_train_separate(
                             cfg_name=cepstral_name.value,
                             input_size=val_loader.dataset.__getitem__(0)[0].shape,
                             validation_interval=val_interval,
-                            optimiser_spec=optimiser_spec,
+                            optimiser_specification=optimiser_spec,
                             num_epochs=num_epochs,
                         )
 
@@ -370,7 +360,7 @@ def out_train_merged(
                     cfg_name=cepstral_name.value,
                     input_size=(1, x_height, x_width),
                     validation_interval=val_interval,
-                    optimiser_spec=optimiser_spec,
+                    optimiser_specification=optimiser_spec,
                     num_epochs=num_epochs,
                 )
 

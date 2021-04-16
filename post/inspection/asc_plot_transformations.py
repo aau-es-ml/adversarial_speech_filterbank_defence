@@ -131,7 +131,6 @@ if __name__ == "__main__":
 
                         for (predictors2, category, indices2) in progress_bar(
                             to_device_iterator(test_loader, device=device),
-                            auto_total_generator=False,
                             total=len(predictors),
                         ):  # Dumb way of selecting
                             idx = int(indices2.cpu()[0].item())

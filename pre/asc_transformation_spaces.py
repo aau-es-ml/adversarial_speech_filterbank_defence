@@ -13,7 +13,6 @@ Cepstral Spaces
     gammatone_fcc = "gfcc"
     inverse_gfcc = "igfcc"
     linear_fcc = "lfcc"  # linear_frequency_cepstral_coefficients
-    # fourier_bessel_cc = 'fbcc'
 
 
 class OtherSpacesEnum(Enum):
