@@ -79,12 +79,11 @@ def adv_noise_aug_func(
     adv_example_file, packed: Tuple[Iterable[Path], Path, numpy.ndarray, Path]
 ) -> None:
     """
-SLOW AND INEFFICIENT!
+    SLOW AND INEFFICIENT!
 
-:param adv_example_file:
-:param packed:
-:return:
-"""
+    :param adv_example_file:
+    :param packed:
+    :return:"""
     noise_files, normal_example_file, clean_rvad_mask, out_dir = packed
     if (
         normal_example_file.name.split("-")[-1] in adv_example_file.name.split("-")[-1]

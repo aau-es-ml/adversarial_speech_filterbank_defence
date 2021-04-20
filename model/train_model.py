@@ -241,21 +241,21 @@ def out_train_merged(
     num_epochs,
 ):
     """
-      for training with merged datasets
+    for training with merged datasets
 
-      :param val_sets:
-      :param load_time:
-      :param exp_name:
-      :param cepstral_name:
-      :param ith_run:
-      :param train_sets:
-      :param batch_size:
-      :param val_interval:
-      :param learning_rate:
-      :param adam_beta1:
-      :param adam_beta2:
-      :param epochs:
-      :return:"""
+    :param val_sets:
+    :param load_time:
+    :param exp_name:
+    :param cepstral_name:
+    :param ith_run:
+    :param train_sets:
+    :param batch_size:
+    :param val_interval:
+    :param learning_rate:
+    :param adam_beta1:
+    :param adam_beta2:
+    :param epochs:
+    :return:"""
     model_id_path = (
         Path(load_time) / exp_name / f"{cepstral_name.value}" / f"seed_{ith_run}"
     )

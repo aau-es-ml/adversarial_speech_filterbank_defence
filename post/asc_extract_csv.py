@@ -35,14 +35,14 @@ def extract_scalars_as_csv(
     only_extract_from_latest_event_file: bool = False,
 ) -> None:
     """
-  :param train_path:
-  :param test_path:
-  :param export_train:
-  :param export_test:
-  :param verbose:
-  :param only_extract_from_latest_event_file:
+    :param train_path:
+    :param test_path:
+    :param export_train:
+    :param export_test:
+    :param verbose:
+    :param only_extract_from_latest_event_file:
 
-  """
+    """
     if only_extract_from_latest_event_file:
         max_load_time = max(
             list(
@@ -131,14 +131,14 @@ def extract_table_tensors_as_csv(
 ) -> None:
     """
 
-  :param train_path:
-  :param test_path:
-  :param export_train:
-  :param export_test:
-  :param verbose:
-  :param only_extract_from_latest_event_file:
-  :return:
-  """
+    :param train_path:
+    :param test_path:
+    :param export_train:
+    :param export_test:
+    :param verbose:
+    :param only_extract_from_latest_event_file:
+    :return:
+    """
     if only_extract_from_latest_event_file:
         max_load_time = max(
             list(
@@ -227,14 +227,14 @@ def extract_curve_tensors_as_csv(
 ) -> None:
     """
 
-  :param train_path:
-  :param test_path:
-  :param export_train:
-  :param export_test:
-  :param verbose:
-  :param only_extract_from_latest_event_file:
-  :return:
-  """
+    :param train_path:
+    :param test_path:
+    :param export_train:
+    :param export_test:
+    :param verbose:
+    :param only_extract_from_latest_event_file:
+    :return:
+    """
     if only_extract_from_latest_event_file:
         max_load_time = max(
             list(

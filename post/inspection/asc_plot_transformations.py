@@ -62,13 +62,13 @@ if __name__ == "__main__":
         embedding_path: Path = EXPORT_RESULTS_PATH / "rep",
     ) -> None:
         """
-    always called after asc_plot_signals!
+        always called after asc_plot_signals!
 
-    :param experiments:
-    :param transformations:
-    :param embedding_path:
-    :return:
-    """
+        :param experiments:
+        :param transformations:
+        :param embedding_path:
+        :return:
+        """
         use_monochrome_style()
 
         if torch.cuda.is_available():
@@ -145,31 +145,31 @@ if __name__ == "__main__":
                                         ):
                                             """
 
-                      left = -(spec.shape[0] / sr) / 2
-                      right = (
-                          spec.shape[1] * 256 / sr
-                          + (spec.shape[0] / sr) / 2
-                      )
-                      lower = -sr / spec.shape[0]
-                      upper = sr / 2 + sr / spec.shape[0]
-                      # freqs = fftfreq(spec.shape[0], 1 / float(sr))[:(spec.shape[0] // 2)]
-                      # ax.yaxis.set_ticks(freqs[::16]) # TODO: FIX
-                      # ax.yaxis.set_ticklabels([f'{m:.0f}' for m in freqs[::16]])
-                      spec = (
-                          numpy.abs(predictors2.to("cpu").numpy()[0][0])
-                          ** 2
-                      )
-                      spec = spec[: (spec.shape[0] // 2)]
-                      stft_db = 10 * numpy.log10()
-                      
-                      pyplot.imshow(stft_db,
-                                    # fignum=0, #use current axis
-                                    origin="lower",
-                                    cmap="gray_r",
-                                    aspect="auto",
-                                    extent=[left, right, lower, upper],
-                                    )  # Spectrogram
-                      """
+                                            left = -(spec.shape[0] / sr) / 2
+                                            right = (
+                                                spec.shape[1] * 256 / sr
+                                                + (spec.shape[0] / sr) / 2
+                                            )
+                                            lower = -sr / spec.shape[0]
+                                            upper = sr / 2 + sr / spec.shape[0]
+                                            # freqs = fftfreq(spec.shape[0], 1 / float(sr))[:(spec.shape[0] // 2)]
+                                            # ax.yaxis.set_ticks(freqs[::16]) # TODO: FIX
+                                            # ax.yaxis.set_ticklabels([f'{m:.0f}' for m in freqs[::16]])
+                                            spec = (
+                                                numpy.abs(predictors2.to("cpu").numpy()[0][0])
+                                                ** 2
+                                            )
+                                            spec = spec[: (spec.shape[0] // 2)]
+                                            stft_db = 10 * numpy.log10()
+
+                                            pyplot.imshow(stft_db,
+                                                          # fignum=0, #use current axis
+                                                          origin="lower",
+                                                          cmap="gray_r",
+                                                          aspect="auto",
+                                                          extent=[left, right, lower, upper],
+                                                          )  # Spectrogram
+                                            """
 
                                             spec = numpy.abs(
                                                 predictors2.to("cpu").numpy()[0][0]
@@ -197,32 +197,32 @@ if __name__ == "__main__":
                                             transformation == OtherSpacesEnum.power_spec
                                         ):
                                             """
-  
-                      left = -(spec.shape[0] / sr) / 2
-                      right = (
-                          spec.shape[1] * 256 / sr
-                          + (spec.shape[0] / sr) / 2
-                      )
-                      lower = -sr / spec.shape[0]
-                      upper = sr / 2 + sr / spec.shape[0]
-                      # freqs = fftfreq(spec.shape[0], 1 / float(sr))[:(spec.shape[0] // 2)]
-                      # ax.yaxis.set_ticks(freqs[::16]) # TODO: FIX
-                      # ax.yaxis.set_ticklabels([f'{m:.0f}' for m in freqs[::16]])
-                      spec = (
-                          numpy.abs(predictors2.to("cpu").numpy()[0][0])
-                          ** 2
-                      )
-                      spec = spec[: (spec.shape[0] // 2)]
-                      stft_db = 10 * numpy.log10()
-                      
-                      pyplot.imshow(stft_db,
-                                    # fignum=0, #use current axis
-                                    origin="lower",
-                                    cmap="gray_r",
-                                    aspect="auto",
-                                    extent=[left, right, lower, upper],
-                                    )  # Spectrogram
-                      """
+
+                                            left = -(spec.shape[0] / sr) / 2
+                                            right = (
+                                                spec.shape[1] * 256 / sr
+                                                + (spec.shape[0] / sr) / 2
+                                            )
+                                            lower = -sr / spec.shape[0]
+                                            upper = sr / 2 + sr / spec.shape[0]
+                                            # freqs = fftfreq(spec.shape[0], 1 / float(sr))[:(spec.shape[0] // 2)]
+                                            # ax.yaxis.set_ticks(freqs[::16]) # TODO: FIX
+                                            # ax.yaxis.set_ticklabels([f'{m:.0f}' for m in freqs[::16]])
+                                            spec = (
+                                                numpy.abs(predictors2.to("cpu").numpy()[0][0])
+                                                ** 2
+                                            )
+                                            spec = spec[: (spec.shape[0] // 2)]
+                                            stft_db = 10 * numpy.log10()
+
+                                            pyplot.imshow(stft_db,
+                                                          # fignum=0, #use current axis
+                                                          origin="lower",
+                                                          cmap="gray_r",
+                                                          aspect="auto",
+                                                          extent=[left, right, lower, upper],
+                                                          )  # Spectrogram
+                                            """
 
                                             spec = predictors2.to("cpu").numpy()[0][0]
                                             specshow(
