@@ -13,8 +13,12 @@ import torch
 from matplotlib import pyplot
 from torch.utils.data import DataLoader, TensorDataset
 
-from configs.path_config import PROCESSED_FILE_ENDING
-from configs.training_config import COMMON_TRAINING_CONFIG
+from configs.path_config import (
+    DATA_ROOT_A_PATH,
+    DATA_ROOT_B_PATH,
+    EXPORT_RESULTS_PATH,
+    PROCESSED_FILE_ENDING,
+)
 from data import AdversarialSpeechBlockDataset
 from configs.experiment_config import EXPERIMENTS
 from draugr.torch_utilities import (
@@ -24,14 +28,37 @@ from draugr.torch_utilities import (
     to_tensor,
     global_pin_memory,
 )
+from apppath import ensure_existence
 from draugr.numpy_utilities import Split
 from draugr.tqdm_utilities import progress_bar
 from pre.asc_transformation_spaces import CepstralSpaceEnum
+from data import AdversarialSpeechDataset
 import csv
 
 if __name__ == "__main__":
 
-    def gather_data_summary(verbose: bool = False) -> None:
+    def gather_get_raw_data_summary():
+
+        summary_path = ensure_existence(EXPORT_RESULTS_PATH / "raw_sum")
+
+        for source_path in [DATA_ROOT_A_PATH, DATA_ROOT_B_PATH]:
+            file_paths, categories = AdversarialSpeechDataset(
+                source_path
+            ).get_all_samples_in_split()
+            num_non_adv = numpy.count_nonzero(categories == 0)
+            num_adv = numpy.count_nonzero(categories == 1)
+
+            num_examples = num_adv + num_non_adv
+            assert len(categories) == num_examples
+
+            with open(
+                summary_path / f"{source_path.name}.csv", "w", newline="",
+            ) as file:
+                writer = csv.writer(file)
+                writer.writerow(["num_examples", "num_adv", "num_non_adv"])
+                writer.writerow([num_examples, num_adv, num_non_adv])
+
+    def gather_block_data_summary(verbose: bool = False) -> None:
         if torch.cuda.is_available():
             device = auto_select_available_cuda_device(2048)
         else:
@@ -43,18 +70,18 @@ if __name__ == "__main__":
 
         for cepstral_name in progress_bar(CepstralSpaceEnum, description="configs #"):
             for exp_name, exp_v in progress_bar(
-                COMMON_TRAINING_CONFIG.EXPERIMENTS, description=f"{cepstral_name}"
+                EXPERIMENTS, description=f"{cepstral_name}"
             ):
 
                 for k, t_ in exp_v.Train_Sets.items():
                     predictors = []
                     categories = []
                     test_names = []
-                    for t in t_.values():
+                    for t in t_:
                         (pt, ct, nt) = AdversarialSpeechBlockDataset(
                             t.path
                             / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
-                            split=Split.Train,
+                            split=Split.Training,
                             random_seed=0,
                             shuffle_data=True,
                             train_percentage=t.train_percentage,
@@ -77,7 +104,8 @@ if __name__ == "__main__":
                     assert len(predictors) == num_examples
 
                     with open(
-                        summary_path / "train_sets" / f"{exp_name}_{k}.csv",
+                        ensure_existence(summary_path / "train_sets")
+                        / f"{exp_name}_{k}.csv",
                         "w",
                         newline="",
                     ) as file:
@@ -89,7 +117,7 @@ if __name__ == "__main__":
                     predictors = []
                     categories = []
                     test_names = []
-                    for t in t_.values():
+                    for t in t_:
                         (pt, ct, nt) = AdversarialSpeechBlockDataset(
                             t.path
                             / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
@@ -116,7 +144,8 @@ if __name__ == "__main__":
                     assert len(predictors) == num_examples
 
                     with open(
-                        summary_path / "validation_sets" / f"{exp_name}_{k}.csv",
+                        ensure_existence(summary_path / "validation_sets")
+                        / f"{exp_name}_{k}.csv",
                         "w",
                         newline="",
                     ) as file:
@@ -128,11 +157,11 @@ if __name__ == "__main__":
                     predictors = []
                     categories = []
                     test_names = []
-                    for t in t_.values():
+                    for t in t_:
                         (pt, ct, nt) = AdversarialSpeechBlockDataset(
                             t.path
                             / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
-                            split=Split.Test,
+                            split=Split.Testing,
                             random_seed=0,
                             shuffle_data=True,
                             train_percentage=t.train_percentage,
@@ -155,7 +184,8 @@ if __name__ == "__main__":
                     assert len(predictors) == num_examples
 
                     with open(
-                        summary_path / "test_sets" / f"{exp_name}_{k}.csv",
+                        ensure_existence(summary_path / "test_sets")
+                        / f"{exp_name}_{k}.csv",
                         "w",
                         newline="",
                     ) as file:
@@ -166,4 +196,5 @@ if __name__ == "__main__":
                 break
             break
 
-    gather_data_summary()
+    gather_get_raw_data_summary()
+    # gather_block_data_summary()

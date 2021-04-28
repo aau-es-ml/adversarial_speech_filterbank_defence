@@ -9,36 +9,38 @@ __doc__ = r"""
 
 import numpy
 import torch
-
-from draugr.tqdm_utilities import progress_bar
-from draugr.visualisation import FigureSession, save_pdf_embed_fig
-from matplotlib import pyplot
-from sklearn.manifold import TSNE
-from torch.utils.data import DataLoader, TensorDataset
-
 from apppath import ensure_existence
-from configs.experiment_config import EXPERIMENTS
-from configs.path_config import (
-    EXPORT_RESULTS_PATH,
-    PROCESSED_FILE_ENDING,
-    PROJECT_APP_PATH,
-)
-from configs.training_config import COMMON_TRAINING_CONFIG
-from data import AdversarialSpeechBlockDataset
-from data.adversarial_speech_dataset import AdversarialSpeechDataset
+from draugr.numpy_utilities import Split
+from draugr.random_utilities import seed_stack
 from draugr.torch_utilities import (
     TensorBoardPytorchWriter,
     auto_select_available_cuda_device,
+    global_pin_memory,
     global_torch_device,
     to_device_iterator,
     to_tensor,
-    global_pin_memory,
 )
-from draugr.numpy_utilities import Split
-from draugr.random_utilities import seed_stack
+from draugr.tqdm_utilities import progress_bar
+from draugr.visualisation import (
+    FigureSession,
+    MonoChromeStyleSession,
+    monochrome_line_no_marker_cycler,
+    save_pdf_embed_fig,
+)
+from matplotlib import cm, pyplot
+from sklearn.manifold import TSNE
+from torch.utils.data import DataLoader, TensorDataset
+from warg import ContextWrapper, GDKC
 
+from configs import EXPORT_RESULTS_PATH, MISC_CONFIG
+from configs.experiment_config import EXPERIMENTS
+from configs.path_config import (
+    PROCESSED_FILE_ENDING,
+    PROJECT_APP_PATH,
+)
+from data import AdversarialSpeechBlockDataset
+from data.adversarial_speech_dataset import AdversarialSpeechDataset
 from pre.asc_transformation_spaces import CepstralSpaceEnum
-from warg import ContextWrapper
 
 if __name__ == "__main__":
 
@@ -67,7 +69,7 @@ if __name__ == "__main__":
                     False,
                 ) as writer:
                     for k, t_ in exp_v.Train_Sets.items():
-                        for t in t_.values():
+                        for t in t_:
                             seed_stack(0)
 
                             (
@@ -91,10 +93,10 @@ if __name__ == "__main__":
                                     to_tensor(predictors[:, numpy.newaxis, ...]),
                                     to_tensor(categories[:, numpy.newaxis]),
                                 ),
-                                batch_size=COMMON_TRAINING_CONFIG.projection_num_samples,
+                                batch_size=MISC_CONFIG.projection_num_samples,
                                 shuffle=True,
                                 num_workers=0,
-                                pin_memory=global_pin_memory(),
+                                pin_memory=global_pin_memory(0),
                             )
 
                             with torch.no_grad():
@@ -102,36 +104,46 @@ if __name__ == "__main__":
                                     iter(to_device_iterator(test_loader, device=device))
                                 )
                                 with FigureSession():
-                                    scattr = pyplot.scatter(
-                                        *zip(
-                                            *TSNE(
-                                                n_components=2,
-                                                random_state=0,
-                                                perplexity=COMMON_TRAINING_CONFIG.tnse_perplexity,
-                                                learning_rate=COMMON_TRAINING_CONFIG.tsne_learning_rate,
-                                            ).fit_transform(
-                                                torch.flatten(predictor_, start_dim=1)
-                                                .cpu()
-                                                .numpy()
-                                            )
+                                    with ContextWrapper(
+                                        GDKC(
+                                            MonoChromeStyleSession,
+                                            prop_cycler=monochrome_line_no_marker_cycler,
                                         ),
-                                        c=category_.cpu().numpy(),
-                                        alpha=0.5,
-                                        s=2.0,
-                                    )
-                                    pyplot.legend(
-                                        handles=scattr.legend_elements()[0],
-                                        labels=[
-                                            c.value
-                                            for c in AdversarialSpeechDataset.DataCategories
-                                        ],
-                                    )
-                                    pyplot.title(f"{cepstral_name.value} {k}")
-                                    save_pdf_embed_fig(
-                                        embedding_path
-                                        / f"{cepstral_name.value}_{k}.pdf"
-                                    )
-                            # writer.embed('TSNE', X_embedded, label_img=predictors2.to("cpu").numpy()) # BORKED!
+                                        True,
+                                    ):
+                                        scattr = pyplot.scatter(
+                                            *zip(
+                                                *TSNE(
+                                                    n_components=2,
+                                                    random_state=0,
+                                                    perplexity=MISC_CONFIG.tnse_perplexity,
+                                                    learning_rate=MISC_CONFIG.tsne_learning_rate,
+                                                ).fit_transform(
+                                                    torch.flatten(
+                                                        predictor_, start_dim=1
+                                                    )
+                                                    .cpu()
+                                                    .numpy()
+                                                )
+                                            ),
+                                            c=category_.cpu().numpy(),
+                                            alpha=0.6,
+                                            s=2.0,
+                                            cmap=cm.PuOr,
+                                        )
+                                        pyplot.legend(
+                                            handles=scattr.legend_elements()[0],
+                                            labels=[
+                                                c.value
+                                                for c in AdversarialSpeechDataset.DataCategories
+                                            ],
+                                        )
+                                        pyplot.title(f"{cepstral_name.value} {k}")
+                                        save_pdf_embed_fig(
+                                            embedding_path
+                                            / f"{cepstral_name.value}_{k}.pdf"
+                                        )
+                                # writer.embed('TSNE', X_embedded, label_img=predictors2.to("cpu").numpy()) # BORKED!
 
             # break
 

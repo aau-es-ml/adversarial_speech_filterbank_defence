@@ -87,7 +87,9 @@ def file_wise_feature_extraction(
         print(f"Cd.ing to: {matlab_files_path}")
         MATLAB_ENGINE.cd(matlab_files_path)
 
-    file_paths, categories = get_dataset_files_and_categories(source_path)
+    file_paths, categories = AdversarialSpeechDataset(
+        source_path
+    ).get_all_samples_in_split()
 
     blocks_total = 0
     labels_split = []

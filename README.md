@@ -12,7 +12,9 @@ run ``python run_all.py``
 
     Firstly
     
-    - Setup dataset paths in configs
+    - Download the required dataset, no official hosting is available.
+
+    - Setup dataset paths in path_config.py, under the ./config path of this project 
     
     - use Robust Voice Activity Detection (Speech/Silence) on the raw dataset to split dataset into speech and silence parts; asc_split_speech.py
     

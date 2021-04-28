@@ -7,18 +7,19 @@ __doc__ = r"""
            Created on 22/06/2020
            """
 
+import sys
 from itertools import chain
 from pathlib import Path
-import sys
-from typing import Sequence
-
-import librosa
-from librosa.display import specshow
 
 sys.path.extend([str(Path.home() / "Projects" / "MyGithub" / "adversarial_speech")])
 
+from pathlib import Path
+from typing import Sequence
+
+import librosa
+from draugr.visualisation import save_pdf_embed_fig
+from librosa.display import specshow
 from matplotlib import pyplot
-from numpy.fft import fftfreq
 
 from torch.utils.data import DataLoader, TensorDataset
 import numpy
@@ -36,12 +37,7 @@ from draugr.numpy_utilities import Split
 from draugr.visualisation import SubplotSession
 from warg import NOD
 
-from configs.experiment_config import (
-    NOISED_SETS,
-    NO_AUG_TO_NOISE,
-    TRUNCATED_SETS,
-    TRUNCATED_SPLITS,
-)
+from configs.experiment_config import NO_AUG_TO_NOISE
 from pre.asc_transformation_spaces import CepstralSpaceEnum, OtherSpacesEnum
 from configs import (
     DATA_ROOT_PATH,
