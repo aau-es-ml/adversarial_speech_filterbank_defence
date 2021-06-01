@@ -41,7 +41,7 @@ from draugr.torch_utilities import (
 from draugr.numpy_utilities import Split
 from draugr.tqdm_utilities import progress_bar
 from draugr.writers import TestingCurves, TestingScalars
-from pre.asc_transformation_spaces import CepstralSpaceEnum
+from pre.cepstral_spaces import CepstralSpaceEnum
 from configs import (
     EXPERIMENTS,
     MODEL_PERSISTENCE_PATH,
@@ -122,7 +122,7 @@ def separate_test(
                 truth = torch.cat(truth, 0)
                 test_names = numpy.array(test_names)
 
-                predictions_int = (predictions > 0.5).cpu().numpy().astype(numpy.int)
+                predictions_int = (predictions > 0.5).cpu().numpy().astype(numpy.int32)
                 truth = truth.cpu()
                 truth_np = truth.numpy()
                 predictions_np = predictions.cpu().numpy()
@@ -142,7 +142,9 @@ def separate_test(
                     roc_auc_score(truth_np, predictions_int),
                 )
                 writer.precision_recall_curve(
-                    TestingCurves.test_precision_recall.value, predictions, truth,
+                    TestingCurves.test_precision_recall.value,
+                    predictions,
+                    truth,
                 )
 
                 (
@@ -154,7 +156,7 @@ def separate_test(
                 )
 
                 predictions_per_file_int = (predictions_per_file > 0.5).astype(
-                    numpy.int
+                    numpy.int32
                 )
 
                 confusion_bw = confusion_matrix(truth_np, predictions_int)
@@ -254,7 +256,7 @@ def merged_test(
             predictions = torch.stack(predictions)
             truth = torch.stack(truth)
 
-            predictions_int = (predictions > 0.5).cpu().numpy().astype(numpy.int)
+            predictions_int = (predictions > 0.5).cpu().numpy().astype(numpy.int32)
             truth = truth.cpu()
             truth_np = truth.numpy()
             predictions_np = predictions.cpu().numpy()
@@ -274,7 +276,9 @@ def merged_test(
                 roc_auc_score(truth_np, predictions_int),
             )
             writer.precision_recall_curve(
-                TestingCurves.test_precision_recall.value, predictions, truth,
+                TestingCurves.test_precision_recall.value,
+                predictions,
+                truth,
             )
 
             (
@@ -285,7 +289,7 @@ def merged_test(
                 predictions_int, truth_np, test_names
             )
 
-            predictions_per_file_int = (predictions_per_file > 0.5).astype(numpy.int)
+            predictions_per_file_int = (predictions_per_file > 0.5).astype(numpy.int32)
 
             confusion_bw = confusion_matrix(truth_np, predictions_int)
             wrong_names_bw = misclassified_names(predictions_int, truth_np, test_names)
@@ -385,4 +389,4 @@ def run_all_experiment_test(
 
 if __name__ == "__main__":
 
-    run_all_experiment_test(only_latest_load_time=True)
+    run_all_experiment_test(only_latest_load_time=False)

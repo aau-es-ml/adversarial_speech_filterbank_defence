@@ -28,7 +28,7 @@ from draugr.visualisation import (
     save_pdf_embed_fig,
 )
 from matplotlib import cm, pyplot
-from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
 from torch.utils.data import DataLoader, TensorDataset
 from warg import ContextWrapper, GDKC
 
@@ -40,18 +40,18 @@ from configs.path_config import (
 )
 from data import AdversarialSpeechBlockDataset
 from data.adversarial_speech_dataset import AdversarialSpeechDataset
-from pre.asc_transformation_spaces import CepstralSpaceEnum
+from pre.cepstral_spaces import CepstralSpaceEnum
 
 if __name__ == "__main__":
 
-    def plot_tsne(verbose: bool = False):
+    def plot_pca():
         if torch.cuda.is_available():
             device = auto_select_available_cuda_device(2048)
         else:
             device = torch.device("cpu")
 
         global_torch_device(override=device)
-        embedding_path = ensure_existence(EXPORT_RESULTS_PATH / "tsne")
+        embedding_path = ensure_existence(EXPORT_RESULTS_PATH / "pca")
 
         for cepstral_name in progress_bar(CepstralSpaceEnum, description="configs #"):
             for exp_name, exp_v in progress_bar(
@@ -99,6 +99,7 @@ if __name__ == "__main__":
                                 pin_memory=global_pin_memory(0),
                             )
 
+                            seed_stack(0)
                             with torch.no_grad():
                                 (predictor_, category_) = next(
                                     iter(to_device_iterator(test_loader, device=device))
@@ -113,11 +114,8 @@ if __name__ == "__main__":
                                     ):
                                         scattr = pyplot.scatter(
                                             *zip(
-                                                *TSNE(
-                                                    n_components=2,
-                                                    random_state=0,
-                                                    perplexity=MISC_CONFIG.tnse_perplexity,
-                                                    learning_rate=MISC_CONFIG.tsne_learning_rate,
+                                                *PCA(
+                                                    n_components=2, random_state=0
                                                 ).fit_transform(
                                                     torch.flatten(
                                                         predictor_, start_dim=1
@@ -147,4 +145,4 @@ if __name__ == "__main__":
 
             # break
 
-    plot_tsne()
+    plot_pca()

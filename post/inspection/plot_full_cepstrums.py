@@ -74,7 +74,10 @@ if __name__ == "__main__":
         # use_monochrome_style()
 
         with ContextWrapper(
-            GDKC(MonoChromeStyleSession, prop_cycler=monochrome_line_no_marker_cycler,),
+            GDKC(
+                MonoChromeStyleSession,
+                prop_cycler=monochrome_line_no_marker_cycler,
+            ),
             True,
         ):
 

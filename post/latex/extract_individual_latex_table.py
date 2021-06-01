@@ -12,33 +12,11 @@ from pathlib import Path
 
 import numpy
 import pandas
-import seaborn
-from apppath import AppPath, ensure_existence, system_open_path
-from draugr.misc_utilities import plot_median_labels, pandas_mean_std_latex_table
-from draugr.visualisation import (
-    FigureSession,
-    MonoChromeStyleSession,
-    decolorise_plot,
-    despine_all,
-    fix_edge_gridlines,
-    latex_clean_label,
-    monochrome_line_no_marker_cycler,
-    save_pdf_embed_fig,
-)
-from matplotlib import pyplot
-from warg import ContextWrapper, GDKC
+from apppath import ensure_existence, system_open_path
+from draugr.misc_utilities import pandas_mean_std_latex_table
+from draugr.tqdm_utilities import progress_bar
 
 from configs.path_config import EXPORT_RESULTS_PATH
-from draugr.tensorboard_utilities import TensorboardEventExporter
-from draugr.tqdm_utilities import progress_bar
-from draugr.writers import (
-    TestingCurves,
-    TestingScalars,
-    TestingTables,
-    TrainingCurves,
-    TrainingScalars,
-    TrainingTables,
-)
 
 __all__ = ["extract_latex_table"]
 
@@ -99,8 +77,6 @@ def extract_latex_table(
 
                             df_result = df_result.reset_index().drop("epoch", axis=1)
 
-                            tab_label = "".join((mapping.name, test_set.name))
-
                             with open(
                                 ensure_existence(
                                     agg_path
@@ -111,14 +87,12 @@ def extract_latex_table(
                                 / Path("table").with_suffix(".tex").name,
                                 "w",
                             ) as f:
+                                tab_label = "_".join((mapping.name, test_set.name))
                                 f.write(
-                                    f"""\\begin{{table}}
-  \caption{{{mapping.name, test_set.name}}}
-  \label{{tab:{tab_label}}}
-  \centering"""
+                                    pandas_mean_std_latex_table(
+                                        df_result, "index", tab_label
+                                    )
                                 )
-                                f.write(pandas_mean_std_latex_table(df_result, "index"))
-                                f.write("\end{table}")
 
 
 if __name__ == "__main__":

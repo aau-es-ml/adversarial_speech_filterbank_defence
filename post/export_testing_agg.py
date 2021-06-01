@@ -58,7 +58,10 @@ def stesting_agg_plot(
     seaborn.set_style("ticks", rc={"axes.grid": True, "text.usetex": True})
     # use_monochrome_style()
     if only_latest_load_time:
-        max_load_time = max(list(results_path.iterdir()), key=os.path.getctime,)
+        max_load_time = max(
+            list(results_path.iterdir()),
+            key=os.path.getctime,
+        )
         results_paths = [max_load_time]
     else:
         results_paths = list(results_path.iterdir())
@@ -379,8 +382,10 @@ if color_plot:
                                                     sqr = int(
                                                         sqrt(len(mean_mean_cf_mat))
                                                     )
-                                                    mean_mean_cf_mat = mean_mean_cf_mat.reshape(
-                                                        (sqr, sqr)
+                                                    mean_mean_cf_mat = (
+                                                        mean_mean_cf_mat.reshape(
+                                                            (sqr, sqr)
+                                                        )
                                                     )
                                                     # mean_mean_cf_mat = numpy.expand_dims(mean_mean_cf_mat, 0)
                                                     my_df = pandas.DataFrame(

@@ -15,8 +15,8 @@ from apppath import system_open_path
 
 from configs.path_config import EXPORT_RESULTS_PATH
 
-from post.asc_export_testing_agg import stesting_agg_plot
-from post.asc_export_training_agg import training_agg_plot
+from post.export_testing_agg import stesting_agg_plot
+from post.export_training_agg import training_agg_plot
 
 # seaborn.set()
 # seaborn.set_style("ticks", rc={"axes.grid":True, "text.usetex":True})

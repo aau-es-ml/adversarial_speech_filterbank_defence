@@ -45,7 +45,7 @@ class ReductionMethod(Enum):
 
 
 class AdversarialSpeechBlockDataset(CategoricalDataset):
-    """"""
+    """ """
 
     @property
     def categories(self) -> OrderedSet[str]:
@@ -102,7 +102,7 @@ class AdversarialSpeechBlockDataset(CategoricalDataset):
         random_seed: int = 42,
         return_names: bool = False,
     ):
-        """"""
+        """ """
         super().__init__()
 
         self._split = split
@@ -349,7 +349,7 @@ class AdversarialSpeechBlockDataset(CategoricalDataset):
 
         return (
             numpy.array(predictors_per_file),
-            numpy.array(response_per_file, dtype=numpy.int),
+            numpy.array(response_per_file, dtype=numpy.int32),
             numpy.array(names_uniq),
         )
 

@@ -40,7 +40,8 @@ def aug_func(
             pass
         else:
             copyfile(
-                normal_example_file, target,
+                normal_example_file,
+                target,
             )
 
     if True:  # ENABLE!
@@ -121,7 +122,9 @@ def compute_noise_augmented_samples(
 
             seed_stack(0)
 
-            normal_file_split_indexer = SplitIndexer(len(normal_files),)
+            normal_file_split_indexer = SplitIndexer(
+                len(normal_files),
+            )
             adv_file_split_indexer = SplitIndexer(len(adv_files))
 
             for (split, nf_indices, af_indices) in progress_bar(

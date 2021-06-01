@@ -54,7 +54,10 @@ def training_agg_plot(
     seaborn.set_style("ticks", rc={"axes.grid": True, "text.usetex": True})
 
     if only_latest_load_time:
-        max_load_time = max(list(results_path.iterdir()), key=os.path.getctime,)
+        max_load_time = max(
+            list(results_path.iterdir()),
+            key=os.path.getctime,
+        )
         results_paths = [max_load_time]
     else:
         results_paths = list(results_path.iterdir())

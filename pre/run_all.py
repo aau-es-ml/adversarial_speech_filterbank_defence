@@ -8,9 +8,9 @@ __doc__ = r"""
            """
 
 from .noises import compute_noised
-from .asc_compute_features import compute_transformations
+from .compute_features import compute_transformations
 
-from .asc_split_speech import compute_speech_silence_splits
+from .split_speech import compute_speech_silence_splits
 
 
 def run_all_precomputations():

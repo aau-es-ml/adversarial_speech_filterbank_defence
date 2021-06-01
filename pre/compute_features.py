@@ -20,7 +20,7 @@ from data.persistence_helper import export_to_path
 from draugr.matlab_utilities import start_engine
 from draugr.tqdm_utilities import progress_bar
 
-from pre.asc_transformation_spaces import OtherSpacesEnum, CepstralSpaceEnum
+from pre.cepstral_spaces import OtherSpacesEnum, CepstralSpaceEnum
 from pre.feature_extraction.matlab_extractor import cepstral_extractor
 
 __all__ = []

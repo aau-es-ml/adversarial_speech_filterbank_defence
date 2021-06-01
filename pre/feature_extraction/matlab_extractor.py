@@ -10,7 +10,7 @@ __doc__ = r"""
 import numpy
 from draugr.matlab_utilities import matlab_to_ndarray, ndarray_to_matlab
 
-from pre.asc_transformation_spaces import CepstralSpaceEnum, OtherSpacesEnum
+from pre.cepstral_spaces import CepstralSpaceEnum, OtherSpacesEnum
 
 __all__ = ["cepstral_extractor"]
 

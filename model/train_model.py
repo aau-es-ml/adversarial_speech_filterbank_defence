@@ -50,7 +50,7 @@ from draugr.torch_utilities import (
 from draugr.writers import TrainingCurves, TrainingScalars
 from draugr.random_utilities import seed_stack
 from draugr.tqdm_utilities import progress_bar
-from pre.asc_transformation_spaces import CepstralSpaceEnum
+from pre.cepstral_spaces import CepstralSpaceEnum
 
 __all__ = ["run_all_experiment_train"]
 
@@ -92,7 +92,7 @@ def train_asc(
                     ):
                         pred = model(predictors_val)
                         loss_accum_val += to_scalar(criterion(pred, category_val))
-                        # accuracy_accum_val += accuracy_score(category.cpu().numpy(),(pred > 0.5).cpu().numpy().astype(numpy.int))
+                        # accuracy_accum_val += accuracy_score(category.cpu().numpy(),(pred > 0.5).cpu().numpy().astype(numpy.int32))
                         pred_s = torch.sigmoid(pred)
                         accuracy_accum_val += to_scalar(
                             ((pred_s > 0.5) == category_val).float().sum()
@@ -178,7 +178,8 @@ def out_train_separate(
             with WorkerSession(0) as num_workers:
                 with WorkerSession(0) as num_workers_val:
                     with TensorBoardPytorchWriter(
-                        LOG_PATH / model_id_path, verbose=False,
+                        LOG_PATH / model_id_path,
+                        verbose=False,
                     ) as writer:
                         train_loader = DataLoader(
                             AdversarialSpeechBlockDataset(

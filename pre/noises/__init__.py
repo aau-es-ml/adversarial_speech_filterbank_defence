@@ -7,10 +7,10 @@ __doc__ = r"""
            Created on 18-02-2021
            """
 
-from .asc_noise_augmentation import compute_noise_augmented_samples
-from .asc_noise_generation import generate_babble, generate_ssn
-from .asc_select_noise import select_split_noise_files
-from .asc_split_noise import split_noise_files
+from .noise_augmentation import compute_noise_augmented_samples
+from .noise_generation import generate_babble, generate_ssn
+from .select_noise import select_split_noise_files
+from .split_noise import split_noise_files
 
 
 def compute_noised():
