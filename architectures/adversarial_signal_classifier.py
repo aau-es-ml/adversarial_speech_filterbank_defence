@@ -17,10 +17,13 @@ __all__ = ["AdversarialSignalClassifier"]
 
 
 class AdversarialSignalClassifier(nn.Module):
-    """"""
+    """ """
 
     def __init__(
-        self, in_channels: int, in_height: int, in_width: int,
+        self,
+        in_channels: int,
+        in_height: int,
+        in_width: int,
     ):
         super().__init__()
 

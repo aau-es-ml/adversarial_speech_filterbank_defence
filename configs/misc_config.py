@@ -16,7 +16,9 @@ __all__ = ["MISC_CONFIG"]
 import_warning(Path(__file__).with_suffix("").name)
 
 MISC_CONFIG = NOD(
-    projection_num_samples=1000, tsne_learning_rate=1000, tnse_perplexity=50,
+    projection_num_samples=1000,
+    tsne_learning_rate=1000,
+    tnse_perplexity=50,
 )
 
 SNR_RATIOS = list(range(0, 20 + 1, 5))  # [0,5,10,15,20]

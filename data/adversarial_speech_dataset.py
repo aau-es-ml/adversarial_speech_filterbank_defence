@@ -49,7 +49,7 @@ def misclassified_names(pred, truth, names, threshold: float = 0.5):
 
 
 class AdversarialSpeechDataset(CategoricalDataset):
-    """"""
+    """ """
 
     class AttackTypeEnum(Enum):
         WhiteBox = "A"
@@ -108,7 +108,7 @@ class AdversarialSpeechDataset(CategoricalDataset):
         # attack_type: AttackTypeEnum = AttackTypeEnum.WhiteBox,
         random_seed: int = 0,
     ):
-        """"""
+        """ """
         super().__init__()
 
         self._split = split

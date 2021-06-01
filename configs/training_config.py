@@ -18,7 +18,11 @@ __all__ = ["COMMON_TRAINING_CONFIG", "LOAD_TIME"]
 import_warning(Path(__file__).with_suffix("").name)
 LOAD_TIME = str(int(time.time()))
 
-COMMON_TRAINING_CONFIG = NOD(val_interval=1, num_runs=5, batch_size=64,)
+COMMON_TRAINING_CONFIG = NOD(
+    val_interval=1,
+    num_runs=5,
+    batch_size=64,
+)
 
 if __name__ == "__main__":
     pass
