@@ -4,7 +4,5 @@
 __author__ = "Christian Heider Nielsen"
 __doc__ = r"""
 
-           Created on 22/06/2020
+           Created on 27-05-2021
            """
-
-from .adversarial_signal_classifier import *

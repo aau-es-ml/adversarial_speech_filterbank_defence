@@ -6,3 +6,10 @@ __doc__ = r"""
 
            Created on 12-11-2020
            """
+
+
+from .path_config import *
+from .experiment_config import *
+from .misc_config import *
+from .model_config import *
+from .training_config import *
