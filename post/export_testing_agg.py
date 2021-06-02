@@ -29,7 +29,7 @@ from draugr.visualisation import (
     latex_clean_label,
     make_errorbar_legend,
     monochrome_line_no_marker_cycler,
-    save_pdf_embed_fig,
+    save_embed_fig,
 )
 from draugr.writers import TestingScalars
 from matplotlib import pyplot
@@ -162,7 +162,7 @@ def stesting_agg_plot(
                                             # auto_post_hatch()
                                             despine_all(prc_ax)
                                             pyplot.tight_layout()
-                                            save_pdf_embed_fig(
+                                            save_embed_fig(
                                                 ensure_existence(
                                                     agg_path
                                                     / timestamp.name
@@ -420,7 +420,7 @@ if color_plot:
                                                             # auto_post_hatch()
                                                             despine_all(cfm_ax)
                                                             # pyplot.tight_layout()
-                                                            save_pdf_embed_fig(
+                                                            save_embed_fig(
                                                                 str(
                                                                     mmcfm_name.with_suffix(
                                                                         ".pdf"
@@ -502,7 +502,7 @@ if color_plot:
                                                                 transform=cfm_ax.transAxes,
                                                             )
                                                             prc_fig.tight_layout()
-                                                            save_pdf_embed_fig(
+                                                            save_embed_fig(
                                                                 str(
                                                                     mcfm_name.with_suffix(
                                                                         ".pdf"
@@ -752,7 +752,7 @@ if color_plot:
                                         # auto_post_hatch()
                                         despine_all(prc_ax)
                                         # pyplot.tight_layout()
-                                        save_pdf_embed_fig(
+                                        save_embed_fig(
                                             ensure_existence(
                                                 agg_path
                                                 / timestamp.name

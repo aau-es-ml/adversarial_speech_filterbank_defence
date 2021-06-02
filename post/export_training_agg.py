@@ -23,7 +23,7 @@ from draugr.visualisation import (
     fix_edge_gridlines,
     latex_clean_label,
     monochrome_line_no_marker_cycler,
-    save_pdf_embed_fig,
+    save_embed_fig,
     set_y_log_scale,
     exponential_moving_average,
 )
@@ -196,7 +196,7 @@ def training_agg_plot(
                                     # auto_post_hatch()
                                     despine_all()
                                     pyplot.tight_layout()
-                                    save_pdf_embed_fig(
+                                    save_embed_fig(
                                         ensure_existence(
                                             agg_path / timestamp.name / mapping.name
                                         )

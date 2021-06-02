@@ -21,7 +21,7 @@ from draugr.visualisation import (
     SubplotSession,
     fix_edge_gridlines,
     monochrome_line_no_marker_cycler,
-    save_pdf_embed_fig,
+    save_embed_fig,
 )
 from librosa.display import specshow
 from matplotlib import pyplot
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         block_window_step_size_ms: int = 512,  # 128
         n_fft: int = 512,
         embedding_path: Path = ensure_existence(EXPORT_RESULTS_PATH / "rep"),
-        max_files: int = 6,  # <0 = Inf samples
+        max_files: int = 9,  # <0 = Inf samples
     ) -> None:
         r"""
 
@@ -86,12 +86,21 @@ if __name__ == "__main__":
             n_fft_filters = n_fft  # fft length in the matlab mfcc function
 
             for data_s, part_id in progress_bar(zip(datasets, out_part_id)):
+                # print(data_s, part_id)
                 normals, advs = AdversarialSpeechDataset.get_normal_adv_wav_file_paths(
                     root_path / data_s
                 )
 
                 num_samples_each = max_files // 2
+                normals = [item for item in normals if "short-signals" in str(item)]
+                advs = [
+                    item
+                    for item in advs
+                    if "short-signals" in str(item) and "adv-short-target" in str(item)
+                ]
+
                 file_paths = normals[:num_samples_each]
+                # print(file_paths)
                 categories = [0] * num_samples_each
 
                 file_paths += advs[:num_samples_each]
@@ -144,23 +153,23 @@ if __name__ == "__main__":
                                 f"{AdversarialSpeechDataset._categories[file_label]} {file_.stem}.All"
                             )
 
-                            save_pdf_embed_fig(f"{a_path}.pdf")
+                            save_embed_fig(f"{a_path}.pdf")
                             write_normalised_wave(
                                 f"{a_path}.wav", sampling_rate, wav_data
                             )
                         with FigureSession():
+                            lin_spec_0 = librosa.stft(
+                                wav_data,
+                                n_fft=n_fft_filters,
+                                hop_length=n_fft_filters // 2,
+                                win_length=n_fft_filters,
+                                window="hanning",
+                            )
+
                             specshow(
-                                librosa.amplitude_to_db(
-                                    numpy.abs(
-                                        librosa.stft(
-                                            wav_data,
-                                            n_fft=n_fft_filters,
-                                            hop_length=n_fft_filters // 2,
-                                            win_length=n_fft_filters,
-                                            window="hanning",
-                                        )
-                                    ),
-                                    ref=numpy.max,
+                                # librosa.amplitude_to_db( numpy.abs(lin_spec_0,   ref=numpy.max  )),
+                                librosa.power_to_db(
+                                    numpy.abs(lin_spec_0) ** 2, ref=numpy.max
                                 ),
                                 y_axis="linear",
                                 x_axis="time",
@@ -172,7 +181,10 @@ if __name__ == "__main__":
                             pyplot.xlabel("Time (seconds)")
                             pyplot.ylabel("Frequency (Hz)")
                             pyplot.tight_layout()
-                            save_pdf_embed_fig(f"{a_path}_librosa_stft.pdf")
+                            save_embed_fig(f"{a_path}_librosa_spectrogram.pdf")
+                            save_embed_fig(
+                                f"{a_path}_librosa_spectrogram.svg", suffix=".svg"
+                            )
                         with SubplotSession(return_self=True) as sps:
                             img = specshow(
                                 librosa.feature.mfcc(
@@ -191,14 +203,14 @@ if __name__ == "__main__":
                             )
                             sps.fig.colorbar(img, ax=sps.axs[0])
                             # sps.axs[0].set(title="MFCC")
-                            save_pdf_embed_fig(f"{a_path}_librosa_mfcc.pdf")
+                            save_embed_fig(f"{a_path}_librosa_mfcc.pdf")
 
                         for ith_block in progress_bar(
                             range(
                                 (data_len - block_window_size_ms) // block_step_size_ms
                             )
                         ):
-                            path = a / f"{file_.stem}_block{ith_block}"
+                            b_path = a / f"{file_.stem}_block{ith_block}"
                             da = wav_data[
                                 ith_block
                                 * block_step_size_ms : ith_block
@@ -211,23 +223,24 @@ if __name__ == "__main__":
                                 pyplot.title(
                                     f"{AdversarialSpeechDataset._categories[file_label]} {file_.stem}.block{ith_block}"
                                 )
-                                save_pdf_embed_fig(f"{path}.pdf")
-                                write_normalised_wave(f"{path}.wav", sampling_rate, da)
+                                save_embed_fig(f"{b_path}.pdf")
+                                write_normalised_wave(
+                                    f"{b_path}.wav", sampling_rate, da
+                                )
                             with FigureSession():
+                                lin_spec = librosa.stft(
+                                    da,
+                                    n_fft=n_fft_filters,
+                                    hop_length=n_fft_filters // 2,
+                                    win_length=n_fft_filters,
+                                    window="hanning",
+                                )
                                 specshow(
-                                    librosa.amplitude_to_db(
-                                        numpy.abs(
-                                            librosa.stft(
-                                                da,
-                                                n_fft=n_fft_filters,
-                                                hop_length=n_fft_filters // 2,
-                                                win_length=n_fft_filters,
-                                                window="hanning",
-                                            )
-                                        ),
-                                        ref=numpy.max,
+                                    # librosa.amplitude_to_db(numpy.abs(lin_spec), ref=numpy.max),
+                                    librosa.power_to_db(
+                                        numpy.abs(lin_spec) ** 2, ref=numpy.max
                                     ),
-                                    y_axis="linear",
+                                    # y_axis="linear",
                                     x_axis="time",
                                     sr=sampling_rate,
                                     hop_length=n_fft_filters // 2,
@@ -237,7 +250,10 @@ if __name__ == "__main__":
                                 pyplot.xlabel("Time (seconds)")
                                 pyplot.ylabel("Frequency (Hz)")
                                 pyplot.tight_layout()
-                                save_pdf_embed_fig(f"{path}_librosa_stft.pdf")
+                                save_embed_fig(f"{b_path}_librosa_spectrogram.pdf")
+                                save_embed_fig(
+                                    f"{b_path}_librosa_spectrogram.svg", suffix=".svg"
+                                )
                             with SubplotSession(return_self=True) as sps:
                                 img = specshow(
                                     librosa.feature.mfcc(
@@ -257,7 +273,7 @@ if __name__ == "__main__":
                                 sps.fig.colorbar(img, ax=sps.axs[0])
                                 # sps.axs[0].set(title="MFCC")
                                 # fix_edge_gridlines(sps.axs[0])
-                                save_pdf_embed_fig(f"{path}_librosa_mfcc.pdf")
+                                save_embed_fig(f"{b_path}_librosa_mfcc.pdf")
 
                             # if ith_block > max_files - 1:
                             #  break

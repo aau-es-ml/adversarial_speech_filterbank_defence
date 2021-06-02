@@ -25,7 +25,7 @@ from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
     monochrome_line_no_marker_cycler,
-    save_pdf_embed_fig,
+    save_embed_fig,
 )
 from matplotlib import cm, pyplot
 from sklearn.decomposition import PCA
@@ -137,7 +137,7 @@ if __name__ == "__main__":
                                             ],
                                         )
                                         pyplot.title(f"{cepstral_name.value} {k}")
-                                        save_pdf_embed_fig(
+                                        save_embed_fig(
                                             embedding_path
                                             / f"{cepstral_name.value}_{k}.pdf"
                                         )

@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Sequence
 
 import librosa
-from draugr.visualisation import save_pdf_embed_fig
+from draugr.visualisation import save_embed_fig
 from librosa.display import specshow
 from matplotlib import pyplot
 
@@ -260,7 +260,7 @@ if __name__ == "__main__":
                                         pyplot.title(
                                             f"{transformation.value} {test_names[idx]} {ds_.idx_to_str(categories[idx])}"
                                         )
-                                        save_pdf_embed_fig(
+                                        save_embed_fig(
                                             ensure_existence(
                                                 embedding_path
                                                 / names_id1
