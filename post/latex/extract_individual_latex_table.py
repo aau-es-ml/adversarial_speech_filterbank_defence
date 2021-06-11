@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy
 import pandas
 from apppath import ensure_existence, system_open_path
-from draugr.misc_utilities import pandas_mean_std_latex_table
+from draugr.pandas_utilities.latex_mean_std import pandas_mean_std_latex_table
 from draugr.tqdm_utilities import progress_bar
 
 from configs.path_config import EXPORT_RESULTS_PATH
@@ -96,5 +96,5 @@ def extract_latex_table(
 
 
 if __name__ == "__main__":
-    extract_latex_table()
+    extract_latex_table(only_latest_load_time=True)
     system_open_path(EXPORT_RESULTS_PATH / "latex", verbose=True)

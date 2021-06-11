@@ -331,15 +331,98 @@ CAF_TO_NOISES = {
     )
 }
 
+
+def rest_exclude_noise_experiment(noise_name: str):
+    return {
+        f"NOISES_ALL_SNR_to_{noise_name}": NOD(
+            Train_Sets={
+                "ALL_NOISE_SNR": [
+                    NOISED_SSS[f"{noise_type}_SNR_{strength}dB_train"]
+                    for strength, noise_type in product(SNR_RATIOS, NOISES)
+                    if noise_type != noise_name
+                ]
+            },
+            Validation_Sets={
+                "ALL_NOISE_SNR": [
+                    NOISED_SSS[f"{noise_type}_SNR_{strength}dB_validation"]
+                    for strength, noise_type in product(SNR_RATIOS, NOISES)
+                    if noise_type != noise_name
+                ]
+            },
+            Test_Sets={
+                **{
+                    k: v
+                    for e in [
+                        {
+                            f"{noise_type}_SNR_{strength}dB": (
+                                NOISED_SSS[f"{noise_type}_SNR_{strength}dB_test"],
+                            )
+                            for strength in SNR_RATIOS
+                        }
+                        for noise_type in (noise_name,)
+                    ]
+                    for k, v in e.items()
+                },
+            },
+            Num_Epochs=DEFAULT_NUM_EPOCHS,
+            Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
+        )
+    }
+
+
+def noise_exclude_experiment(noise_name: str):
+
+    return {
+        f"{noise_name}_ALL_SNR_to_NOISES": NOD(
+            Train_Sets={
+                f"{noise_name}_ALL_SNR": [
+                    NOISED_SSS[f"{noise_type}_SNR_{strength}dB_train"]
+                    for strength, noise_type in product(SNR_RATIOS, NOISES)
+                    if noise_type == noise_name
+                ],
+            },
+            Validation_Sets={
+                f"{noise_name}_ALL_SNR": [
+                    NOISED_SSS[f"{noise_type}_SNR_{strength}dB_validation"]
+                    for strength, noise_type in product(SNR_RATIOS, NOISES)
+                    if noise_type == noise_name
+                ],
+            },
+            Test_Sets={
+                **{
+                    f"ALL_NOISE_{strength}dB": [
+                        NOISED_SSS[f"{noise_type}_SNR_{strength}dB_test"]
+                        for noise_type in NOISES
+                        if noise_type != noise_name
+                    ]
+                    for strength in SNR_RATIOS
+                },
+            },
+            Num_Epochs=DEFAULT_NUM_EPOCHS,
+            Optimiser_Spec=DEFAULT_OPTIMISER_SPEC,
+        )
+    }
+
+
+NOISES_TO_BUS = rest_exclude_noise_experiment("TBUS")
+BUS_TO_NOISES = noise_exclude_experiment("TBUS")
+
+NOISES_TO_BBL = rest_exclude_noise_experiment("bbl_morten")
+BBL_TO_NOISES = noise_exclude_experiment("bbl_morten")
+
 EXPERIMENTS = NOD(
-    **TRUNCATED_SETS,
-    **MERGED_SETS,
-    **TRUNCATED_SPLITS,
+    # **TRUNCATED_SETS,
+    # **MERGED_SETS,
+    # **TRUNCATED_SPLITS,
+    # **MERGED_SPLITS,
+    # **NOISED_SETS,
     **NO_AUG_TO_NOISE,
-    **NOISES_TO_CAF,
-    **NOISED_SETS,
-    **MERGED_SPLITS,
-    **CAF_TO_NOISES,
+    # **NOISES_TO_CAF,
+    # **CAF_TO_NOISES,
+    # **NOISES_TO_BUS,
+    # **BUS_TO_NOISES,
+    **NOISES_TO_BBL,
+    **BBL_TO_NOISES,
 )
 
 if __name__ == "__main__":

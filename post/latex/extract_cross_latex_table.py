@@ -191,7 +191,10 @@ def save_table(agg_path, b, name, merged_dfs_snr):
                                 values="test_receiver_operator_characteristic_auc",
                                 index=ss.index.droplevel(-1).map(
                                     "{0[0]:.13}".format
-                                ),  # cross noise 'equal_mapping*'
+                                ),  # cross noise 'equal_mapping*' len 13
+                                # cross snr 'noises_all_snr_to_bbl' #TODO: WARNING NOT FOOL PROOF, if naming is
+                                #  equal near beginning of identifier!
+                                #  make it more reliable
                                 columns="filter_bank",
                                 aggfunc={
                                     "test_receiver_operator_characteristic_auc": [
@@ -237,5 +240,5 @@ def save_table(agg_path, b, name, merged_dfs_snr):
 
 
 if __name__ == "__main__":
-    extract_cross_latex_table()
+    extract_cross_latex_table(only_latest_load_time=True)
     system_open_path(EXPORT_RESULTS_PATH / "latex", verbose=True)

@@ -244,7 +244,7 @@ def stesting_agg_plot(
                                 ).T  # drop duplicate columns but messes up datatype
 
                                 for column in merged_df.columns:  # fix datatypes
-                                    if column is not "transformation":
+                                    if column != "transformation":
                                         merged_df[column] = pandas.to_numeric(
                                             merged_df[column]
                                         )
@@ -766,7 +766,7 @@ if color_plot:
 if __name__ == "__main__":
 
     stesting_agg_plot(
-        only_latest_load_time=False,
+        only_latest_load_time=True,
         color_plot=False,
         include_titles=False,
         compute_scalar_agg=True,

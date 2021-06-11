@@ -323,6 +323,6 @@ def extract_metrics(only_extract_latest=False):
 
 
 if __name__ == "__main__":
-    extract_metrics(only_extract_latest=False)
+    extract_metrics(only_extract_latest=True)
     # extract_scalars_as_csv(verbose=False,export_train=False)
     system_open_path(EXPORT_RESULTS_PATH / "csv", verbose=True)

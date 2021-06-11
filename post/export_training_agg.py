@@ -27,7 +27,7 @@ from draugr.visualisation import (
     set_y_log_scale,
     exponential_moving_average,
 )
-from draugr.misc_utilities import ChainedAssignmentOptionEnum
+from draugr.pandas_utilities import ChainedAssignmentOptionEnum
 from draugr.writers import (
     TrainingScalars,
     should_plot_y_log_scale,

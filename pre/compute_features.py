@@ -174,8 +174,8 @@ def block_wise_feature_extraction(
     save_to_disk: bool,
     out_path: Path,
     out_id: str,
-    block_window_size: int,
-    block_window_step_size: int,
+    block_window_size_ms: int,
+    block_window_step_size_ms: int,
     n_fcc: int,
     cepstral_window_length_ms: int,  # window length in the matlab mfcc function
     n_fft: int = 512,  # fft length in the matlab mfcc function
@@ -187,8 +187,8 @@ def block_wise_feature_extraction(
     :param function:
     :param source_path:
     :param save_to_disk:
-    :param block_window_size:
-    :param block_window_step_size:
+    :param block_window_size_ms:
+    :param block_window_step_size_ms:
     :param out_path:
     :param out_id:
     :param n_fcc:
@@ -225,25 +225,23 @@ def block_wise_feature_extraction(
             raise e
         data_len = len(wav_data)
 
-        block_window_size_ms = (
-            block_window_size * sampling_rate
-        ) // 1000  # window size in mS
-        block_step_size_ms = (block_window_step_size * sampling_rate) // 1000
+        block_window_size = (block_window_size_ms * sampling_rate) // 1000
+        block_step_size = (block_window_step_size_ms * sampling_rate) // 1000
 
         if (
-            block_window_size_ms >= data_len
-            or block_step_size_ms >= data_len
+            block_window_size >= data_len
+            or block_step_size >= data_len
             or n_fft >= data_len
         ):
-            if block_window_size_ms >= data_len:
+            if block_window_size >= data_len:
                 print("full size is reached for window")
-            if block_step_size_ms >= data_len:
+            if block_step_size >= data_len:
                 print("full size is reached for step")
             if n_fft >= data_len:
                 print("to bad...")
         else:
             file_cepstral_blocks = []
-            num_blocks: int = (data_len - block_window_size_ms) // block_step_size_ms
+            num_blocks: int = (data_len - block_window_size) // block_step_size
 
             for ith_block in progress_bar(
                 range(num_blocks), auto_describe_iterator=False
@@ -251,8 +249,8 @@ def block_wise_feature_extraction(
                 a = cepstral_extractor(
                     function,
                     wav_data[
-                        ith_block * block_step_size_ms : ith_block * block_step_size_ms
-                        + block_window_size_ms
+                        ith_block * block_step_size : ith_block * block_step_size
+                        + block_window_size
                     ],  # split data into blocks of window size
                     matlab_engine_=MATLAB_ENGINE,
                     sample_rate=sampling_rate,
@@ -270,7 +268,7 @@ def block_wise_feature_extraction(
             file_cepstral_blocks.append(
                 cepstral_extractor(
                     function,
-                    wav_data[data_len - block_window_size_ms :],
+                    wav_data[data_len - block_window_size :],
                     matlab_engine_=MATLAB_ENGINE,
                     sample_rate=sampling_rate,
                     cepstral_window_length_ms=cepstral_window_length_ms,
@@ -382,8 +380,8 @@ def compute_dataset_features(
                     save_to_disk=True,
                     out_path=out_path,
                     out_id=part_id,
-                    block_window_size=block_window_size_ms,
-                    block_window_step_size=block_window_step_size_ms,
+                    block_window_size_ms=block_window_size_ms,
+                    block_window_step_size_ms=block_window_step_size_ms,
                     n_fcc=n_mfcc,
                     n_fft=n_fft,
                     cepstral_window_length_ms=cepstral_window_length_ms,
@@ -470,8 +468,8 @@ def compute_speech_silence_features(
                         save_to_disk=True,
                         out_path=out_path,
                         out_id=out_id,
-                        block_window_size=block_window_size_ms,
-                        block_window_step_size=block_window_step_size_ms,
+                        block_window_size_ms=block_window_size_ms,
+                        block_window_step_size_ms=block_window_step_size_ms,
                         n_fcc=n_mfcc,
                         n_fft=n_fft,
                         cepstral_window_length_ms=cepstral_window_length_ms,
@@ -543,8 +541,8 @@ def compute_noised_dataset_features(
                                         save_to_disk=True,
                                         out_path=out_path,
                                         out_id=out_id,
-                                        block_window_size=block_window_size_ms,
-                                        block_window_step_size=block_window_step_size_ms,
+                                        block_window_size_ms=block_window_size_ms,
+                                        block_window_step_size_ms=block_window_step_size_ms,
                                         n_fcc=n_fcc,
                                         n_fft=n_fft,
                                         cepstral_window_length_ms=cepstral_window_length_ms,

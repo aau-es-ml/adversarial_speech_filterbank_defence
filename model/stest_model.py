@@ -7,14 +7,26 @@ __doc__ = r"""
            Created on 22/06/2020
            """
 
-from logging import error, info
-
 import os
+from logging import error, info
 from pathlib import Path
 
 import numpy
 import torch
-
+from apppath import ensure_existence
+from draugr.numpy_utilities import Split
+from draugr.python_utilities import WorkerSession
+from draugr.torch_utilities import (
+    TensorBoardPytorchWriter,
+    TorchEvalSession,
+    auto_select_available_cuda_device,
+    global_pin_memory,
+    global_torch_device,
+    to_device_iterator,
+    to_tensor,
+)
+from draugr.tqdm_utilities import progress_bar
+from draugr.writers import TestingCurves, TestingScalars
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
@@ -25,35 +37,20 @@ from sklearn.metrics import (
 from torch.types import Device
 from torch.utils.data import DataLoader, TensorDataset
 
-from apppath import ensure_existence
 from architectures.adversarial_signal_classifier import AdversarialSignalClassifier
-
-from draugr.python_utilities import WorkerSession
-from draugr.torch_utilities import (
-    TensorBoardPytorchWriter,
-    TorchEvalSession,
-    auto_select_available_cuda_device,
-    global_torch_device,
-    to_device_iterator,
-    to_tensor,
-    global_pin_memory,
-)
-from draugr.numpy_utilities import Split
-from draugr.tqdm_utilities import progress_bar
-from draugr.writers import TestingCurves, TestingScalars
-from pre.cepstral_spaces import CepstralSpaceEnum
 from configs import (
+    COMMON_TRAINING_CONFIG,
     EXPERIMENTS,
     MODEL_PERSISTENCE_PATH,
     PROCESSED_FILE_ENDING,
     PROJECT_APP_PATH,
-    COMMON_TRAINING_CONFIG,
 )
 from data import (
     AdversarialSpeechBlockDataset,
     export_results_numpy,
     misclassified_names,
 )
+from pre.cepstral_spaces import CepstralSpaceEnum
 
 __all__ = ["run_all_experiment_test"]
 
