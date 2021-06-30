@@ -35,7 +35,7 @@ from draugr.torch_utilities import (
 from draugr.tqdm_utilities import progress_bar
 from draugr.numpy_utilities import Split
 from draugr.visualisation import SubplotSession
-from warg import NOD
+from warg import NOD, NopContext
 
 from configs.experiment_config import NO_AUG_TO_NOISE
 from pre.cepstral_spaces import CepstralSpaceEnum, OtherSpacesEnum
@@ -56,6 +56,7 @@ if __name__ == "__main__":
         experiments,
         transformations: Sequence = (*CepstralSpaceEnum, OtherSpacesEnum.short_term_ft),
         embedding_path: Path = EXPORT_RESULTS_PATH / "rep",
+        use_mono_chrome_style: bool = False,
     ) -> None:
         """
         always called after asc_plot_signals!
@@ -65,7 +66,7 @@ if __name__ == "__main__":
         :param embedding_path:
         :return:
         """
-        use_monochrome_style()
+        use_monochrome_style() if use_mono_chrome_style else nop()
 
         if torch.cuda.is_available():
             device = auto_select_available_cuda_device(2048)
@@ -184,7 +185,7 @@ if __name__ == "__main__":
                                                 hop_length=len(
                                                     spec
                                                 ),  # half of fft length default
-                                                cmap="gray_r",
+                                                # cmap="gray_r",
                                             )
 
                                             ax.set_ylabel("Frequency [hz]")
@@ -233,7 +234,7 @@ if __name__ == "__main__":
                                                 hop_length=len(
                                                     spec
                                                 ),  # half of fft length default
-                                                cmap="gray_r",
+                                                # cmap="gray_r",
                                             )
 
                                             ax.set_ylabel("Frequency [hz]")
@@ -248,7 +249,7 @@ if __name__ == "__main__":
                                                 sr=sr,
                                                 hop_length=256,  # half of fft length default
                                                 # fignum=0,
-                                                cmap="gray_r",
+                                                # cmap="gray_r",
                                                 # aspect="auto",
                                                 # origin="lower",
                                             )

@@ -20,7 +20,7 @@ from neodroidaudition.data.recognition.libri_speech import LibriSpeech
 
 from configs.path_config import (
     GENERATED_NOISES_UNPROCESSED_ROOT_PATH,
-    NOISES_UNPROCESSED_ROOT_PATH,
+    AURORA_NOISES,
 )
 
 

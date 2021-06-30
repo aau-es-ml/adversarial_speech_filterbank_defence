@@ -8,7 +8,6 @@ __doc__ = r"""
            """
 
 from pathlib import Path
-from typing import Sequence
 
 import librosa
 import numpy
@@ -17,47 +16,30 @@ from draugr.scipy_utilities import read_normalised_wave, write_normalised_wave
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
-    SubplotSession,
     fix_edge_gridlines,
     monochrome_line_no_marker_cycler,
     save_embed_fig,
 )
+from draugr.visualisation.matplotlib_utilities.figure_sessions import StyleSession
 from librosa.display import specshow
 from matplotlib import pyplot
-from warg import ContextWrapper, GDKC, NopContext
+from warg import ContextWrapper, GDKC, sink, NopContext
 
-from configs import (
-    DATA_ROOT_PATH,
-    EXPORT_RESULTS_PATH,
-    GENERATED_NOISES_UNPROCESSED_ROOT_PATH,
-)
+from configs import DATA_ROOT_NOISED_UNPROCESSED_PATH, EXPORT_RESULTS_PATH
 
 if __name__ == "__main__":
 
     def plot_signal(
-        root_path: Path,
-        datasets: Sequence = (
-            "adversarial_dataset-A",
-            # "adversarial_dataset-B"
-        ),
-        out_part_id: Sequence = (
-            "A",
-            # "B"
-        ),
         *,
-        n_fcc: int = 20,
-        block_window_size_ms: int = 512,  # 128
-        block_window_step_size_ms: int = 512,  # 128
         n_fft: int = 512,
-        export_path: Path = ensure_existence(EXPORT_RESULTS_PATH / "rep"),
-        max_files: int = 9,  # <0 = Inf samples
+        embedding_path: Path = ensure_existence(EXPORT_RESULTS_PATH / "rep"),
         use_mono_chrome_style: bool = False,
     ) -> None:
         r"""
 
         :param max_files:
         :param n_fcc:
-        :param export_path:
+        :param embedding_path:
         :param root_path:
         :type root_path:
         :param block_window_size_ms:
@@ -76,18 +58,36 @@ if __name__ == "__main__":
 
         # use_monochrome_style()
 
+        a = (
+            "10dbnormal",
+            DATA_ROOT_NOISED_UNPROCESSED_PATH
+            / "A"
+            / "testing"
+            / "5m_5f_babble_SNR_10dB"
+            / "normal"
+            / "sample-001417.wav",
+        )
+        b = (
+            "10dbadv",
+            DATA_ROOT_NOISED_UNPROCESSED_PATH
+            / "A"
+            / "testing"
+            / "5m_5f_babble_SNR_10dB"
+            / "adv"
+            / "adv-short2short-001417.wav",
+        )
+
+        postfix = "mono_chrome" if use_mono_chrome_style else "color"
+
         with ContextWrapper(
             GDKC(
                 MonoChromeStyleSession,
                 prop_cycler=monochrome_line_no_marker_cycler,
             ),
             True,
-        ) if use_mono_chrome_style else NopContext():
+        ) if use_mono_chrome_style else StyleSession():
             n_fft_filters = n_fft  # fft length in the matlab mfcc function
-
-            file_paths = GENERATED_NOISES_UNPROCESSED_ROOT_PATH.iterdir()
-
-            for file_ in file_paths:
+            for id, file_ in (a, b):
                 print(file_)
                 try:
                     sampling_rate, wav_data = read_normalised_wave(file_)
@@ -97,10 +97,11 @@ if __name__ == "__main__":
 
                 parts = file_.stem.split("-")
                 a = ensure_existence(
-                    export_path
+                    embedding_path
                     / f"{parts[-1]}"
                     / "raw"
-                    / "noise"
+                    / "noised"
+                    / id
                     / f'{"_".join(parts[:-1])}'
                 )
                 a_path = a / f"{file_.stem}_all"
@@ -127,41 +128,17 @@ if __name__ == "__main__":
                         x_axis="time",
                         sr=sampling_rate,
                         hop_length=n_fft_filters // 2,
-                        # cmap="gray_r",
+                        # cmap="gray_r" if use_mono_chrome_style else 'inferno',
                     )
                     pyplot.colorbar(format="%+2.0f dB")
                     pyplot.xlabel("Time (seconds)")
                     pyplot.ylabel("Frequency (Hz)")
                     pyplot.tight_layout()
-                    save_embed_fig(f"{a_path}_librosa_spectrogram.pdf")
+                    save_embed_fig(f"{a_path}_librosa_spectrogram_{postfix}.pdf")
                     if False:
                         save_embed_fig(
-                            f"{a_path}_librosa_spectrogram.svg", suffix=".svg"
+                            f"{a_path}_librosa_spectrogram_{postfix}.svg", suffix=".svg"
                         )
-                if False:
-                    with SubplotSession(return_self=True) as sps:
-                        img = specshow(
-                            librosa.feature.mfcc(
-                                y=wav_data,
-                                sr=sampling_rate,
-                                n_mfcc=n_fcc,
-                                n_fft=n_fft_filters,
-                                hop_length=n_fft_filters // 2,
-                                win_length=n_fft_filters,
-                            ),
-                            sr=sampling_rate,
-                            hop_length=n_fft_filters // 2,
-                            x_axis="time",
-                            ax=sps.axs[0],
-                            # cmap="gray_r",
-                        )
-                        sps.fig.colorbar(img, ax=sps.axs[0])
-                        # sps.axs[0].set(title="MFCC")
-                        save_embed_fig(f"{a_path}_librosa_mfcc.pdf")
+            system_open_path(embedding_path, verbose=True)
 
-        system_open_path(export_path, verbose=True)
-
-    plot_signal(
-        DATA_ROOT_PATH,
-        # ensure_existence(DATA_REGULAR_PROCESSED_PATH)
-    )
+    plot_signal()

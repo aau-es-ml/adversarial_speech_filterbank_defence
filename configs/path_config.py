@@ -14,12 +14,15 @@ from warg.imports import import_warning
 
 import_warning(Path(__file__).with_suffix("").name)
 PROJECT_APP_PATH = AppPath("adversarial_speech", __author__)
-NOISES_UNPROCESSED_ROOT_PATH = (
-    Path.home() / "Data" / "Audio" / "noises" / "AuroraNoises"
-)
+LOG_PATH = PROJECT_APP_PATH.user_log
+
+
+# SOURCE PATHS - is expected to available
+AURORA_NOISES = Path.home() / "Data" / "Audio" / "noises" / "AuroraNoises"
 DEMAND_NOISES = Path().home() / "Data" / "Audio" / "noises" / "demand_subset"
 MORTEN_NOISES = Path().home() / "Data" / "Audio" / "kolbek_slt2016"
 
+# TARGET PATHS - will be generated
 GENERATED_NOISES_UNPROCESSED_ROOT_PATH = (
     PROJECT_APP_PATH.user_data / "unprocessed" / "generated_noises"
 )
@@ -48,5 +51,3 @@ EXPORT_RESULTS_PATH = PROJECT_APP_PATH.user_data / "export"
 BEST_VAL_MODEL_NAME = "best_val_model_params.pt"
 FINAL_MODEL_NAME = "final_model_params.pt"
 PROCESSED_FILE_ENDING = ".npz"
-
-LOG_PATH = PROJECT_APP_PATH.user_log

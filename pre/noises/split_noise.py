@@ -13,7 +13,7 @@ from apppath import ensure_existence
 from configs.path_config import (
     GENERATED_NOISES_UNPROCESSED_ROOT_PATH,
     NOISES_SPLIT_UNPROCESSED_ROOT_PATH,
-    NOISES_UNPROCESSED_ROOT_PATH,
+    AURORA_NOISES,
 )
 
 from draugr.numpy_utilities import Split
@@ -22,7 +22,7 @@ from draugr.tqdm_utilities import progress_bar
 
 def split_noise_files():
     noise_files = (
-        *list(NOISES_UNPROCESSED_ROOT_PATH.rglob("*.wav")),
+        *list(AURORA_NOISES.rglob("*.wav")),
         *list(GENERATED_NOISES_UNPROCESSED_ROOT_PATH.rglob("*.wav")),
     )
     for noise_file in progress_bar(noise_files):

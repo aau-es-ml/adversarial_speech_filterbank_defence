@@ -12,9 +12,10 @@ from pathlib import Path
 from spafe.fbanks import bark_fbanks, gammatone_fbanks, linear_fbanks, mel_fbanks
 
 from configs import EXPORT_RESULTS_PATH
+from warg import NopContext
 
 
-def plot_filter_banks(path: Path):
+def plot_filter_banks(path: Path, use_mono_chrome_style: bool = False):
 
     # init vars
     channels = 20
@@ -74,7 +75,7 @@ def plot_filter_banks(path: Path):
                 prop_cycler=monochrome_line_no_marker_cycler,
             ),
             True,
-        ):
+        ) if use_mono_chrome_style else NopContext():
             for fbank in v:
                 pyplot.plot(fbank)
             pyplot.title(k)

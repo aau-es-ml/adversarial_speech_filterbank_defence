@@ -14,7 +14,7 @@ from configs.path_config import (
     DEMAND_NOISES,
     GENERATED_NOISES_UNPROCESSED_ROOT_PATH,
     NOISES_SPLIT_UNPROCESSED_ROOT_PATH,
-    NOISES_UNPROCESSED_ROOT_PATH,
+    AURORA_NOISES,
 )
 
 from draugr.numpy_utilities import Split

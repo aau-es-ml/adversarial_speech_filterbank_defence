@@ -25,7 +25,7 @@ from draugr.visualisation import (
 )
 from librosa.display import specshow
 from matplotlib import pyplot
-from warg import ContextWrapper, GDKC
+from warg import ContextWrapper, GDKC, NopContext
 
 from configs import DATA_ROOT_PATH, EXPORT_RESULTS_PATH
 from data import AdversarialSpeechDataset
@@ -48,7 +48,8 @@ if __name__ == "__main__":
         block_window_step_size_ms: int = 512,  # 128
         n_fft: int = 512,
         embedding_path: Path = ensure_existence(EXPORT_RESULTS_PATH / "rep"),
-        max_files: int = 9,  # <0 = Inf samples
+        max_files: int = 9,  # <0 = Inf samples,
+        use_mono_chrome_style: bool = False,
     ) -> None:
         r"""
 
@@ -79,10 +80,7 @@ if __name__ == "__main__":
                 prop_cycler=monochrome_line_no_marker_cycler,
             ),
             True,
-        ):
-
-            block_window_size = block_window_size_ms
-            block_window_step_size = block_window_step_size_ms
+        ) if use_mono_chrome_style else NopContext():
             n_fft_filters = n_fft  # fft length in the matlab mfcc function
 
             for data_s, part_id in progress_bar(zip(datasets, out_part_id)):
@@ -118,21 +116,21 @@ if __name__ == "__main__":
                         raise e
                     data_len = len(wav_data)
 
-                    block_window_size_ms = (
-                        block_window_size * sampling_rate
+                    block_window_num_points = (
+                        block_window_size_ms * sampling_rate
                     ) // 1000  # window size in mS
-                    block_step_size_ms = (
-                        block_window_step_size * sampling_rate
+                    block_window_num_point_step = (
+                        block_window_step_size_ms * sampling_rate
                     ) // 1000
 
                     if (
-                        block_window_size_ms >= data_len
-                        or block_step_size_ms >= data_len
+                        block_window_num_points >= data_len
+                        or block_window_num_point_step >= data_len
                         or n_fft_filters >= data_len
                     ):
-                        if block_window_size_ms >= data_len:
+                        if block_window_num_points >= data_len:
                             print("full size is reached for window")
-                        if block_step_size_ms >= data_len:
+                        if block_window_num_point_step >= data_len:
                             print("full size is reached for step")
                         if n_fft_filters >= data_len:
                             print("to bad...")
@@ -175,7 +173,7 @@ if __name__ == "__main__":
                                 x_axis="time",
                                 sr=sampling_rate,
                                 hop_length=n_fft_filters // 2,
-                                cmap="gray_r",
+                                # cmap="gray_r",
                             )
                             pyplot.colorbar(format="%+2.0f dB")
                             pyplot.xlabel("Time (seconds)")
@@ -199,7 +197,7 @@ if __name__ == "__main__":
                                 hop_length=n_fft_filters // 2,
                                 x_axis="time",
                                 ax=sps.axs[0],
-                                cmap="gray_r",
+                                # cmap="gray_r",
                             )
                             sps.fig.colorbar(img, ax=sps.axs[0])
                             # sps.axs[0].set(title="MFCC")
@@ -207,15 +205,16 @@ if __name__ == "__main__":
 
                         for ith_block in progress_bar(
                             range(
-                                (data_len - block_window_size_ms) // block_step_size_ms
+                                (data_len - block_window_num_points)
+                                // block_window_num_point_step
                             )
                         ):
                             b_path = a / f"{file_.stem}_block{ith_block}"
                             da = wav_data[
                                 ith_block
-                                * block_step_size_ms : ith_block
-                                * block_step_size_ms
-                                + block_window_size_ms
+                                * block_window_num_point_step : ith_block
+                                * block_window_num_point_step
+                                + block_window_num_points
                             ]  # split data into blocks of window size
                             with FigureSession():
                                 pyplot.plot(da)
@@ -244,7 +243,7 @@ if __name__ == "__main__":
                                     x_axis="time",
                                     sr=sampling_rate,
                                     hop_length=n_fft_filters // 2,
-                                    cmap="gray_r",
+                                    # cmap="gray_r",
                                 )
                                 pyplot.colorbar(format="%+2.0f dB")
                                 pyplot.xlabel("Time (seconds)")
@@ -268,7 +267,7 @@ if __name__ == "__main__":
                                     hop_length=n_fft_filters // 2,
                                     x_axis="time",
                                     ax=sps.axs[0],
-                                    cmap="gray_r",
+                                    # cmap="gray_r",
                                 )
                                 sps.fig.colorbar(img, ax=sps.axs[0])
                                 # sps.axs[0].set(title="MFCC")

@@ -110,4 +110,5 @@ class AdversarialSignalClassifier(nn.Module):
 
 if __name__ == "__main__":
 
-    AdversarialSignalClassifier(3, 100, 100)
+    model = AdversarialSignalClassifier(3, 100, 100)
+    print(model.__repr__())
