@@ -268,7 +268,7 @@ def stesting_agg_plot(
                                         """
 err_style = VisualisationErrorStyle.Bar
 if color_plot:
-  err_style = VisualisationErrorStyle.Band
+err_style = VisualisationErrorStyle.Band
 """
                                         ran_once = False
                                         min_xs = (0, 1)

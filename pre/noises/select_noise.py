@@ -7,23 +7,15 @@ __doc__ = r"""
            Created on 28-10-2020
            """
 
-from scipy.io import wavfile
+from shutil import copyfile
 
-from apppath import ensure_existence
 from configs.path_config import (
     DEMAND_NOISES,
     GENERATED_NOISES_UNPROCESSED_ROOT_PATH,
-    NOISES_SPLIT_UNPROCESSED_ROOT_PATH,
-    AURORA_NOISES,
 )
-
-from draugr.numpy_utilities import Split
-from draugr.tqdm_utilities import progress_bar
-from shutil import copyfile
 
 
 def select_split_noise_files():
-
     ds = {}
     for a in DEMAND_NOISES.iterdir():
         for b in a.iterdir():

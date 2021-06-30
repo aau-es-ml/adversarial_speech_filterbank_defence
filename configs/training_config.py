@@ -14,7 +14,6 @@ from warg import NOD, import_warning
 
 __all__ = ["COMMON_TRAINING_CONFIG", "LOAD_TIME"]
 
-
 import_warning(Path(__file__).with_suffix("").name)
 LOAD_TIME = str(int(time.time()))
 

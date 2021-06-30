@@ -56,7 +56,7 @@ class AdversarialSpeechDataset(CategoricalDataset):
         BlackBox = "B"
 
     class DataCategories(Enum):
-        Normal = "normal"
+        Benign = "normal"
         Adversarial = "adversarial"
 
     _categories = OrderedSet([c.value for c in DataCategories])

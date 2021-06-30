@@ -17,6 +17,7 @@ from draugr.scipy_utilities import read_normalised_wave, write_normalised_wave
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
+    StyleSession,
     SubplotSession,
     fix_edge_gridlines,
     monochrome_line_no_marker_cycler,
@@ -24,7 +25,7 @@ from draugr.visualisation import (
 )
 from librosa.display import specshow
 from matplotlib import pyplot
-from warg import ContextWrapper, GDKC, NopContext
+from warg import ContextWrapper, GDKC
 
 from configs import (
     DATA_ROOT_PATH,
@@ -82,7 +83,7 @@ if __name__ == "__main__":
                 prop_cycler=monochrome_line_no_marker_cycler,
             ),
             True,
-        ) if use_mono_chrome_style else NopContext():
+        ) if use_mono_chrome_style else StyleSession():
             n_fft_filters = n_fft  # fft length in the matlab mfcc function
 
             file_paths = GENERATED_NOISES_UNPROCESSED_ROOT_PATH.iterdir()
@@ -127,7 +128,7 @@ if __name__ == "__main__":
                         x_axis="time",
                         sr=sampling_rate,
                         hop_length=n_fft_filters // 2,
-                        # cmap="gray_r",
+                        cmap=pyplot.rcParams["image.cmap"],
                     )
                     pyplot.colorbar(format="%+2.0f dB")
                     pyplot.xlabel("Time (seconds)")
@@ -153,7 +154,7 @@ if __name__ == "__main__":
                             hop_length=n_fft_filters // 2,
                             x_axis="time",
                             ax=sps.axs[0],
-                            # cmap="gray_r",
+                            cmap=pyplot.rcParams["image.cmap"],
                         )
                         sps.fig.colorbar(img, ax=sps.axs[0])
                         # sps.axs[0].set(title="MFCC")

@@ -16,15 +16,14 @@ from typing import Any, Sequence, Tuple
 
 import numpy
 import torch
+from draugr.numpy_utilities import Split
+from draugr.torch_utilities import CategoricalDataset, to_tensor
+from draugr.tqdm_utilities import progress_bar
 from sklearn.model_selection import train_test_split
+from warg import OrderedSet
 
 from data.adversarial_speech_dataset import AdversarialSpeechDataset
 from data.persistence_helper import extract_tuple_from_path
-from draugr.torch_utilities import to_tensor
-from draugr.torch_utilities import CategoricalDataset
-from draugr.numpy_utilities import Split
-from draugr.tqdm_utilities import progress_bar
-from warg import OrderedSet
 
 """
 import torchaudio

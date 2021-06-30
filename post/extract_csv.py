@@ -11,7 +11,6 @@ import os
 from pathlib import Path
 
 from apppath import AppPath, ensure_existence, system_open_path
-from configs.path_config import EXPORT_RESULTS_PATH
 from draugr.tensorboard_utilities import TensorboardEventExporter
 from draugr.tqdm_utilities import progress_bar
 from draugr.writers import (
@@ -22,6 +21,8 @@ from draugr.writers import (
     TrainingScalars,
     TrainingTables,
 )
+
+from configs.path_config import EXPORT_RESULTS_PATH
 
 __all__ = ["extract_scalars_as_csv", "extract_curve_tensors_as_csv", "extract_metrics"]
 

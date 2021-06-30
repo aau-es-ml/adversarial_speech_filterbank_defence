@@ -16,7 +16,6 @@ import_warning(Path(__file__).with_suffix("").name)
 PROJECT_APP_PATH = AppPath("adversarial_speech", __author__)
 LOG_PATH = PROJECT_APP_PATH.user_log
 
-
 # SOURCE PATHS - is expected to available
 AURORA_NOISES = Path.home() / "Data" / "Audio" / "noises" / "AuroraNoises"
 DEMAND_NOISES = Path().home() / "Data" / "Audio" / "noises" / "demand_subset"

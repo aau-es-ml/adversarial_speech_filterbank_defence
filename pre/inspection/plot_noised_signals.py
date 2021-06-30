@@ -16,14 +16,14 @@ from draugr.scipy_utilities import read_normalised_wave, write_normalised_wave
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
+    StyleSession,
     fix_edge_gridlines,
     monochrome_line_no_marker_cycler,
     save_embed_fig,
 )
-from draugr.visualisation.matplotlib_utilities.figure_sessions import StyleSession
 from librosa.display import specshow
 from matplotlib import pyplot
-from warg import ContextWrapper, GDKC, sink, NopContext
+from warg import ContextWrapper, GDKC
 
 from configs import DATA_ROOT_NOISED_UNPROCESSED_PATH, EXPORT_RESULTS_PATH
 
@@ -57,24 +57,23 @@ if __name__ == "__main__":
         """
 
         # use_monochrome_style()
-
-        a = (
-            "10dbnormal",
+        adv_s = (
+            "10db_adv",
             DATA_ROOT_NOISED_UNPROCESSED_PATH
             / "A"
-            / "testing"
-            / "5m_5f_babble_SNR_10dB"
-            / "normal"
-            / "sample-001417.wav",
-        )
-        b = (
-            "10dbadv",
-            DATA_ROOT_NOISED_UNPROCESSED_PATH
-            / "A"
-            / "testing"
-            / "5m_5f_babble_SNR_10dB"
+            / "training"
+            / "bbl_morten_SNR_10dB"
             / "adv"
-            / "adv-short2short-001417.wav",
+            / "adv-short2short-000303.wav",
+        )
+        ben_s = (
+            "10db_benign",
+            DATA_ROOT_NOISED_UNPROCESSED_PATH
+            / "A"
+            / "training"
+            / "bbl_morten_SNR_10dB"
+            / "normal"
+            / "sample-000303.wav",
         )
 
         postfix = "mono_chrome" if use_mono_chrome_style else "color"
@@ -87,7 +86,7 @@ if __name__ == "__main__":
             True,
         ) if use_mono_chrome_style else StyleSession():
             n_fft_filters = n_fft  # fft length in the matlab mfcc function
-            for id, file_ in (a, b):
+            for id, file_ in (adv_s, ben_s):
                 print(file_)
                 try:
                     sampling_rate, wav_data = read_normalised_wave(file_)
@@ -128,7 +127,9 @@ if __name__ == "__main__":
                         x_axis="time",
                         sr=sampling_rate,
                         hop_length=n_fft_filters // 2,
-                        # cmap="gray_r" if use_mono_chrome_style else 'inferno',
+                        cmap=pyplot.rcParams["image.cmap"]
+                        if use_mono_chrome_style
+                        else "inferno",
                     )
                     pyplot.colorbar(format="%+2.0f dB")
                     pyplot.xlabel("Time (seconds)")

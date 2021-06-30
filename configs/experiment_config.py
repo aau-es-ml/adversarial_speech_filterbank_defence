@@ -371,7 +371,6 @@ def rest_exclude_noise_experiment(noise_name: str):
 
 
 def noise_exclude_experiment(noise_name: str):
-
     return {
         f"{noise_name}_ALL_SNR_to_NOISES": NOD(
             Train_Sets={
@@ -411,16 +410,16 @@ NOISES_TO_BBL = rest_exclude_noise_experiment("bbl_morten")
 BBL_TO_NOISES = noise_exclude_experiment("bbl_morten")
 
 EXPERIMENTS = NOD(
-    # **TRUNCATED_SETS,
-    # **MERGED_SETS,
-    # **TRUNCATED_SPLITS,
-    # **MERGED_SPLITS,
-    # **NOISED_SETS,
+    **TRUNCATED_SETS,
+    **MERGED_SETS,
+    **TRUNCATED_SPLITS,
+    **MERGED_SPLITS,
+    **NOISED_SETS,
     **NO_AUG_TO_NOISE,
-    # **NOISES_TO_CAF,
-    # **CAF_TO_NOISES,
-    # **NOISES_TO_BUS,
-    # **BUS_TO_NOISES,
+    **NOISES_TO_CAF,
+    **CAF_TO_NOISES,
+    **NOISES_TO_BUS,
+    **BUS_TO_NOISES,
     **NOISES_TO_BBL,
     **BBL_TO_NOISES,
 )

@@ -7,33 +7,27 @@ __doc__ = r"""
            Created on 22/06/2020
            """
 
+import csv
+
 import numpy
 import torch
+from apppath import ensure_existence
+from draugr.numpy_utilities import Split
+from draugr.torch_utilities import (
+    auto_select_available_cuda_device,
+    global_torch_device,
+)
+from draugr.tqdm_utilities import progress_bar
 
-from matplotlib import pyplot
-from torch.utils.data import DataLoader, TensorDataset
-
+from configs.experiment_config import EXPERIMENTS
 from configs.path_config import (
     DATA_ROOT_A_PATH,
     DATA_ROOT_B_PATH,
     EXPORT_RESULTS_PATH,
     PROCESSED_FILE_ENDING,
 )
-from data import AdversarialSpeechBlockDataset
-from configs.experiment_config import EXPERIMENTS
-from draugr.torch_utilities import (
-    auto_select_available_cuda_device,
-    global_torch_device,
-    to_device_iterator,
-    to_tensor,
-    global_pin_memory,
-)
-from apppath import ensure_existence
-from draugr.numpy_utilities import Split
-from draugr.tqdm_utilities import progress_bar
+from data import AdversarialSpeechBlockDataset, AdversarialSpeechDataset
 from pre.cepstral_spaces import CepstralSpaceEnum
-from data import AdversarialSpeechDataset
-import csv
 
 if __name__ == "__main__":
 

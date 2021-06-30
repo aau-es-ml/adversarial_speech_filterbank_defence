@@ -18,6 +18,7 @@ from draugr.tqdm_utilities import progress_bar
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
+    StyleSession,
     SubplotSession,
     fix_edge_gridlines,
     monochrome_line_no_marker_cycler,
@@ -25,7 +26,7 @@ from draugr.visualisation import (
 )
 from librosa.display import specshow
 from matplotlib import pyplot
-from warg import ContextWrapper, GDKC, NopContext
+from warg import ContextWrapper, GDKC
 
 from configs import DATA_ROOT_PATH, EXPORT_RESULTS_PATH
 from data import AdversarialSpeechDataset
@@ -80,7 +81,7 @@ if __name__ == "__main__":
                 prop_cycler=monochrome_line_no_marker_cycler,
             ),
             True,
-        ) if use_mono_chrome_style else NopContext():
+        ) if use_mono_chrome_style else StyleSession():
             n_fft_filters = n_fft  # fft length in the matlab mfcc function
 
             for data_s, part_id in progress_bar(zip(datasets, out_part_id)):
@@ -173,7 +174,7 @@ if __name__ == "__main__":
                                 x_axis="time",
                                 sr=sampling_rate,
                                 hop_length=n_fft_filters // 2,
-                                # cmap="gray_r",
+                                cmap=pyplot.rcParams["image.cmap"],
                             )
                             pyplot.colorbar(format="%+2.0f dB")
                             pyplot.xlabel("Time (seconds)")
@@ -197,7 +198,7 @@ if __name__ == "__main__":
                                 hop_length=n_fft_filters // 2,
                                 x_axis="time",
                                 ax=sps.axs[0],
-                                # cmap="gray_r",
+                                cmap=pyplot.rcParams["image.cmap"],
                             )
                             sps.fig.colorbar(img, ax=sps.axs[0])
                             # sps.axs[0].set(title="MFCC")
@@ -243,7 +244,7 @@ if __name__ == "__main__":
                                     x_axis="time",
                                     sr=sampling_rate,
                                     hop_length=n_fft_filters // 2,
-                                    # cmap="gray_r",
+                                    cmap=pyplot.rcParams["image.cmap"],
                                 )
                                 pyplot.colorbar(format="%+2.0f dB")
                                 pyplot.xlabel("Time (seconds)")
@@ -267,7 +268,7 @@ if __name__ == "__main__":
                                     hop_length=n_fft_filters // 2,
                                     x_axis="time",
                                     ax=sps.axs[0],
-                                    # cmap="gray_r",
+                                    cmap=pyplot.rcParams["image.cmap"],
                                 )
                                 sps.fig.colorbar(img, ax=sps.axs[0])
                                 # sps.axs[0].set(title="MFCC")

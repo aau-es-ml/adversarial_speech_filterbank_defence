@@ -24,10 +24,11 @@ from draugr.tqdm_utilities import progress_bar
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
+    StyleSession,
     monochrome_line_no_marker_cycler,
     save_embed_fig,
 )
-from matplotlib import cm, pyplot
+from matplotlib import pyplot
 from sklearn.manifold import TSNE
 from torch.utils.data import DataLoader, TensorDataset
 from warg import ContextWrapper, GDKC
@@ -44,7 +45,7 @@ from pre.cepstral_spaces import CepstralSpaceEnum
 
 if __name__ == "__main__":
 
-    def plot_tsne(verbose: bool = False):
+    def plot_tsne(verbose: bool = False, use_monochrome_style: bool = False):
         if torch.cuda.is_available():
             device = auto_select_available_cuda_device(2048)
         else:
@@ -57,6 +58,14 @@ if __name__ == "__main__":
             for exp_name, exp_v in progress_bar(
                 EXPERIMENTS, description=f"{cepstral_name}"
             ):
+                if (
+                    exp_name == "TRUNCATED_A" or exp_name == "TRUNCATED_B"
+                ):  #'EQUAL_MAPPING_NO_AUG_to_NOISE_ALL_SNR':
+                    # print(exp_name)
+                    pass
+                else:
+                    # print(f'goahead {exp_name}')
+                    continue
 
                 with ContextWrapper(
                     TensorBoardPytorchWriter(
@@ -69,6 +78,11 @@ if __name__ == "__main__":
                     False,
                 ) as writer:
                     for k, t_ in exp_v.Train_Sets.items():
+                        # if k != 'no_aug':
+                        #  continue
+                        # else:
+                        #  pass
+                        # print(k)
                         for t in t_:
                             seed_stack(0)
 
@@ -78,7 +92,7 @@ if __name__ == "__main__":
                                 nt,
                             ) = AdversarialSpeechBlockDataset(
                                 t.path
-                                / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
+                                / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
                                 split=Split.Training,
                                 random_seed=0,
                                 train_percentage=1.0,
@@ -88,12 +102,17 @@ if __name__ == "__main__":
                                 num_samples=None,
                             ).get_all_samples_in_split()
 
+                            num_samples = (
+                                MISC_CONFIG.projection_num_samples
+                                if MISC_CONFIG.projection_num_samples
+                                else len(predictors)
+                            )
                             test_loader = DataLoader(
                                 TensorDataset(
                                     to_tensor(predictors[:, numpy.newaxis, ...]),
                                     to_tensor(categories[:, numpy.newaxis]),
                                 ),
-                                batch_size=MISC_CONFIG.projection_num_samples,
+                                batch_size=num_samples,
                                 shuffle=True,
                                 num_workers=0,
                                 pin_memory=global_pin_memory(0),
@@ -110,7 +129,7 @@ if __name__ == "__main__":
                                             prop_cycler=monochrome_line_no_marker_cycler,
                                         ),
                                         True,
-                                    ):
+                                    ) if use_monochrome_style else StyleSession():
                                         scattr = pyplot.scatter(
                                             *zip(
                                                 *TSNE(
@@ -129,16 +148,22 @@ if __name__ == "__main__":
                                             c=category_.cpu().numpy(),
                                             alpha=0.6,
                                             s=2.0,
-                                            cmap=cm.PuOr,
+                                            rasterized=True,
+                                            cmap=pyplot.cm.coolwarm,
                                         )
                                         pyplot.legend(
                                             handles=scattr.legend_elements()[0],
                                             labels=[
                                                 c.value
+                                                if c.value != "normal"
+                                                else "benign"
                                                 for c in AdversarialSpeechDataset.DataCategories
                                             ],
                                         )
-                                        pyplot.title(f"{cepstral_name.value} {k}")
+                                        """
+                    pyplot.title(f"{str(cepstral_name.value).replace('_',' ')} "
+                                 f"{str(k).replace('_',' ')} {num_samples} samples")
+                                 """
                                         save_embed_fig(
                                             embedding_path
                                             / f"{cepstral_name.value}_{k}.pdf"

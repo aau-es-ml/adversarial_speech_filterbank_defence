@@ -8,26 +8,25 @@ __doc__ = r"""
            """
 
 import os
-from enum import Enum
 from pathlib import Path
 
 import numpy
 import pandas
 import seaborn
 from apppath import ensure_existence, system_open_path
+from draugr.pandas_utilities import ChainedAssignmentOptionEnum
 from draugr.tqdm_utilities import progress_bar
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
     despine_all,
+    exponential_moving_average,
     fix_edge_gridlines,
     latex_clean_label,
     monochrome_line_no_marker_cycler,
     save_embed_fig,
     set_y_log_scale,
-    exponential_moving_average,
 )
-from draugr.pandas_utilities import ChainedAssignmentOptionEnum
 from draugr.writers import (
     TrainingScalars,
     should_plot_y_log_scale,
@@ -207,11 +206,11 @@ def training_agg_plot(
     if compute_tensor_agg:
         pass
         """
-    for tag in TrainingTables:
-      pass
-    for tag in TrainingCurves:
-      pass
-    """
+for tag in TrainingTables:
+  pass
+for tag in TrainingCurves:
+  pass
+"""
 
 
 if __name__ == "__main__":

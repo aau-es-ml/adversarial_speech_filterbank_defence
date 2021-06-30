@@ -7,8 +7,8 @@ __doc__ = r"""
            Created on 22/06/2020
            """
 
-from .extract_csv import extract_metrics
 from .export_agg import compute_agg_plots
+from .extract_csv import extract_metrics
 
 
 def run_all_postcomputations():

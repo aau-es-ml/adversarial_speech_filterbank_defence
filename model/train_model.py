@@ -7,49 +7,46 @@ __doc__ = r"""
            Created on 22/06/2020
            """
 
-from logging import info
-from typing import Iterable, Tuple
-
-from draugr.numpy_utilities import Split
-
 import math
 import time
+from logging import info
 from pathlib import Path
+from typing import Iterable, Tuple
 
 import numpy
 import torch
-from torch.types import Device
-from torch.utils.data import DataLoader, TensorDataset
-
 from apppath import ensure_existence
-from warg import GDKC
-
-from architectures.adversarial_signal_classifier import AdversarialSignalClassifier
-from configs.experiment_config import EXPERIMENTS
-from configs.path_config import (
-    LOG_PATH,
-    MODEL_PERSISTENCE_PATH,
-    BEST_VAL_MODEL_NAME,
-    FINAL_MODEL_NAME,
-    PROCESSED_FILE_ENDING,
-)
-from data import AdversarialSpeechBlockDataset
+from draugr.numpy_utilities import Split
 from draugr.python_utilities import WorkerSession
+from draugr.random_utilities import seed_stack
 from draugr.torch_utilities import (
     TensorBoardPytorchWriter,
     TorchEvalSession,
     TorchTrainSession,
     auto_select_available_cuda_device,
+    global_pin_memory,
     global_torch_device,
     to_device_iterator,
     to_scalar,
     to_tensor,
     torch_clean_up,
-    global_pin_memory,
 )
-from draugr.writers import TrainingCurves, TrainingScalars
-from draugr.random_utilities import seed_stack
 from draugr.tqdm_utilities import progress_bar
+from draugr.writers import TrainingCurves, TrainingScalars
+from torch.types import Device
+from torch.utils.data import DataLoader, TensorDataset
+from warg import GDKC
+
+from architectures.adversarial_signal_classifier import AdversarialSignalClassifier
+from configs.experiment_config import EXPERIMENTS
+from configs.path_config import (
+    BEST_VAL_MODEL_NAME,
+    FINAL_MODEL_NAME,
+    LOG_PATH,
+    MODEL_PERSISTENCE_PATH,
+    PROCESSED_FILE_ENDING,
+)
+from data import AdversarialSpeechBlockDataset
 from pre.cepstral_spaces import CepstralSpaceEnum
 
 __all__ = ["run_all_experiment_train"]
@@ -68,7 +65,6 @@ def train_asc(
     num_epochs: int,
     device: Device = global_torch_device(),
 ) -> None:
-
     model = AdversarialSignalClassifier(*input_size).to(device)
     criterion = torch.nn.BCEWithLogitsLoss()
     optimiser = optimiser_specification(model.parameters())

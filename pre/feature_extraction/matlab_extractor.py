@@ -80,21 +80,21 @@ def cepstral_extractor(
         return imfcc
         """
 elif function == CepstralSpaceEnum.fourier_bessel_cc:
-    res = matlab_engine_.extract_fbcc_edited(
-        data_list_mat,
-        float(sample_rate),
-        float(cepstral_window_length_ms),
-        float(num_fft),
-        float(num_fcc),
-        nargout=3,
-    )  # (speech,Fs,Window_Length,NFFT,No_Filter)
-    fbcc = matlab_to_ndarray(res[0])
-    if concat_delta:
-        fbcc = numpy.stack([fbcc, matlab_to_ndarray(res[1])])
-    if concat_delta_delta:
-        fbcc = numpy.stack([fbcc, matlab_to_ndarray(res[2])])
-    return fbcc
-    """
+res = matlab_engine_.extract_fbcc_edited(
+    data_list_mat,
+    float(sample_rate),
+    float(cepstral_window_length_ms),
+    float(num_fft),
+    float(num_fcc),
+    nargout=3,
+)  # (speech,Fs,Window_Length,NFFT,No_Filter)
+fbcc = matlab_to_ndarray(res[0])
+if concat_delta:
+    fbcc = numpy.stack([fbcc, matlab_to_ndarray(res[1])])
+if concat_delta_delta:
+    fbcc = numpy.stack([fbcc, matlab_to_ndarray(res[2])])
+return fbcc
+"""
     elif (
         function == CepstralSpaceEnum.gammatone_fcc
         or function == CepstralSpaceEnum.inverse_gfcc

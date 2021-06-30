@@ -8,10 +8,9 @@ __doc__ = r"""
            """
 
 import torch
+from draugr.torch_utilities import conv2d_hw_shape, max_pool2d_hw_shape
 from numpy import product
 from torch import nn, relu
-
-from draugr.torch_utilities import conv2d_hw_shape, max_pool2d_hw_shape
 
 __all__ = ["AdversarialSignalClassifier"]
 

@@ -1,12 +1,11 @@
 import pathlib
 
 import numpy
+from apppath import ensure_existence
+from draugr.tqdm_utilities import parallel_umap, progress_bar
 from scipy.io import wavfile
 
-from apppath import ensure_existence
 from configs.path_config import DATA_ROOT_PATH, DATA_ROOT_SS_SPLITS_UNPROCESSED_PATH
-from draugr.tqdm_utilities import progress_bar, parallel_umap
-
 
 __author__ = "Christian Heider Nielsen"
 __doc__ = r"""Split the data into silence and speech parts"""

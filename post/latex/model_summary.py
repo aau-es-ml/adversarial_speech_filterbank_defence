@@ -79,7 +79,6 @@ def merged_test(
             / model_id
             / merged_name_str,
         ) as writer:
-
             predictors = numpy.concatenate(predictors)
             categories = numpy.concatenate(categories)
             test_names = numpy.concatenate(test_names)

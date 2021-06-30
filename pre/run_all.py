@@ -7,9 +7,8 @@ __doc__ = r"""
            Created on 04-12-2020
            """
 
-from .noises import compute_noised
 from .compute_features import compute_transformations
-
+from .noises import compute_noised
 from .split_speech import compute_speech_silence_splits
 
 

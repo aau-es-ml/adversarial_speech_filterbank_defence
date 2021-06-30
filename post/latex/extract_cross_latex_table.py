@@ -14,14 +14,11 @@ import numpy
 import pandas
 from apppath import ensure_existence, system_open_path
 from draugr.pandas_utilities import (
-    pandas_mean_std,
-    nested_dict_to_three_level_column_df,
-    pandas_mean_std_to_str,
-    pandas_format_bold_max_row_latex,
     color_highlight_extreme,
+    pandas_mean_std,
+    pandas_mean_std_to_str,
     pandas_to_latex_clean,
 )
-
 from draugr.tqdm_utilities import progress_bar
 
 from configs.path_config import EXPORT_RESULTS_PATH
@@ -165,7 +162,7 @@ def save_table(agg_path, b, name, merged_dfs_snr):
                                 values="test_receiver_operator_characteristic_auc",
                                 index=ss.index.droplevel(-1).map(
                                     "{0[0]:.20}".format
-                                ),  #  'equal_mapping_###*'
+                                ),  # 'equal_mapping_###*'
                                 columns="filter_bank",
                                 aggfunc={
                                     "test_receiver_operator_characteristic_auc": [
@@ -213,12 +210,12 @@ def save_table(agg_path, b, name, merged_dfs_snr):
         # TODO EXPORT SNR MEANS
     mean_std_str = pandas_mean_std_to_str(selected_columns, precision=3)
     """
-  mean_std_pivot = selecteed.pivot_table(values='test_receiver_operator_characteristic_auc',
-                                         index=selecteed.index.droplevel(-1),
-                                         columns='filter_bank',
-                                         aggfunc='first'
-                                         )
- """
+mean_std_pivot = selecteed.pivot_table(values='test_receiver_operator_characteristic_auc',
+                                       index=selecteed.index.droplevel(-1),
+                                       columns='filter_bank',
+                                       aggfunc='first'
+                                       )
+"""
     mean_std_str_pivot = mean_std_str.pivot_table(
         values="test_receiver_operator_characteristic_auc",
         index=mean_std_str.index.droplevel(-1),

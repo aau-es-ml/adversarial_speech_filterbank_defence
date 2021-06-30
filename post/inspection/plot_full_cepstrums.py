@@ -166,7 +166,7 @@ if __name__ == "__main__":
                                 x_axis="time",
                                 sr=sampling_rate,
                                 hop_length=n_fft_filters // 2,
-                                # cmap="gray_r",
+                                cmap=pyplot.rcParams["image.cmap"],
                             )
                             pyplot.colorbar(format="%+2.0f dB")
                             pyplot.xlabel("Time (seconds)")
@@ -187,7 +187,7 @@ if __name__ == "__main__":
                                 hop_length=n_fft_filters // 2,
                                 x_axis="time",
                                 ax=sps.axs[0],
-                                # cmap="gray_r",
+                                cmap=pyplot.rcParams["image.cmap"],
                             )
                             sps.fig.colorbar(img, ax=sps.axs[0])
                             # sps.axs[0].set(title="MFCC")
@@ -231,7 +231,7 @@ if __name__ == "__main__":
                                     x_axis="time",
                                     sr=sampling_rate,
                                     hop_length=n_fft_filters // 2,
-                                    # cmap="gray_r",
+                                    cmap=pyplot.rcParams["image.cmap"],
                                 )
                                 pyplot.colorbar(format="%+2.0f dB")
                                 pyplot.xlabel("Time (seconds)")
@@ -252,7 +252,7 @@ if __name__ == "__main__":
                                     hop_length=n_fft_filters // 2,
                                     x_axis="time",
                                     ax=sps.axs[0],
-                                    # cmap="gray_r",
+                                    cmap=pyplot.rcParams["image.cmap"],
                                 )
                                 sps.fig.colorbar(img, ax=sps.axs[0])
                                 # sps.axs[0].set(title="MFCC")

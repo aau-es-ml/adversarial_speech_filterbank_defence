@@ -31,6 +31,7 @@ from draugr.tqdm_utilities import progress_bar
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
+    StyleSession,
     fix_edge_gridlines,
     ltas_plot,
     monochrome_line_no_marker_cycler,
@@ -38,7 +39,7 @@ from draugr.visualisation import (
 )
 from matplotlib import pyplot
 from scipy.signal import welch
-from warg import ContextWrapper, GDKC, NopContext
+from warg import ContextWrapper, GDKC
 
 from configs import DATA_ROOT_PATH, EXPORT_RESULTS_PATH
 from data import AdversarialSpeechDataset
@@ -92,7 +93,7 @@ if __name__ == "__main__":
                 prop_cycler=monochrome_line_no_marker_cycler,
             ),
             True,
-        ) if use_mono_chrome_style else NopContext():
+        ) if use_mono_chrome_style else StyleSession():
 
             block_window_size = block_window_size_ms
             block_window_step_size = block_window_step_size_ms

@@ -2,9 +2,11 @@ from pathlib import Path
 from typing import Sequence, Tuple
 
 import numpy
-from draugr.scipy_utilities import read_normalised_wave
-
 from apppath import ensure_existence
+from draugr.matlab_utilities import start_engine
+from draugr.scipy_utilities import read_normalised_wave
+from draugr.tqdm_utilities import progress_bar
+
 from configs.experiment_config import (
     DATA_NOISED_PROCESSED_PATH,
     DATA_REGULAR_PROCESSED_PATH,
@@ -17,10 +19,7 @@ from configs.path_config import (
 )
 from data import AdversarialSpeechDataset
 from data.persistence_helper import export_to_path
-from draugr.matlab_utilities import start_engine
-from draugr.tqdm_utilities import progress_bar
-
-from pre.cepstral_spaces import OtherSpacesEnum, CepstralSpaceEnum
+from pre.cepstral_spaces import CepstralSpaceEnum, OtherSpacesEnum
 from pre.feature_extraction.matlab_extractor import cepstral_extractor
 
 __all__ = []

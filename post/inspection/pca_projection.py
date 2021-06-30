@@ -27,7 +27,7 @@ from draugr.visualisation import (
     monochrome_line_no_marker_cycler,
     save_embed_fig,
 )
-from matplotlib import cm, pyplot
+from matplotlib import pyplot
 from sklearn.decomposition import PCA
 from torch.utils.data import DataLoader, TensorDataset
 from warg import ContextWrapper, GDKC
@@ -126,8 +126,8 @@ if __name__ == "__main__":
                                             ),
                                             c=category_.cpu().numpy(),
                                             alpha=0.6,
-                                            s=2.0,
-                                            cmap=cm.PuOr,
+                                            s=3.0,
+                                            # cmap=cm.PuOr,
                                         )
                                         pyplot.legend(
                                             handles=scattr.legend_elements()[0],

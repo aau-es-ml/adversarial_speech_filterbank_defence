@@ -12,15 +12,14 @@ from pathlib import Path
 import torchaudio
 from apppath import ensure_existence
 from draugr.torch_utilities import to_tensor
+from neodroidaudition.data.recognition.libri_speech import LibriSpeech
 from neodroidaudition.noise_generation import (
     generate_babble_noise,
     generate_speech_shaped_noise,
 )
-from neodroidaudition.data.recognition.libri_speech import LibriSpeech
 
 from configs.path_config import (
     GENERATED_NOISES_UNPROCESSED_ROOT_PATH,
-    AURORA_NOISES,
 )
 
 
@@ -62,7 +61,7 @@ def generate_ssn(num_samples: int = 20):
     torchaudio.save(
         str(
             ensure_existence(GENERATED_NOISES_UNPROCESSED_ROOT_PATH)
-            / f"{num_samples//2}m_{num_samples//2}f_ssn.wav"
+            / f"{num_samples // 2}m_{num_samples // 2}f_ssn.wav"
         ),
         to_tensor(noise),
         sr,
@@ -104,7 +103,7 @@ def generate_babble(num_samples=10):
         files,
         sr[0],
         export_path=ensure_existence(GENERATED_NOISES_UNPROCESSED_ROOT_PATH)
-        / f"{num_samples//2}m_{num_samples//2}f_babble.wav",
+        / f"{num_samples // 2}m_{num_samples // 2}f_babble.wav",
     )
 
 

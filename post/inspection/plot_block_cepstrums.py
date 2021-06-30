@@ -35,7 +35,7 @@ from draugr.torch_utilities import (
 from draugr.tqdm_utilities import progress_bar
 from draugr.numpy_utilities import Split
 from draugr.visualisation import SubplotSession
-from warg import NOD, NopContext
+from warg import NOD
 
 from configs.experiment_config import NO_AUG_TO_NOISE
 from pre.cepstral_spaces import CepstralSpaceEnum, OtherSpacesEnum
@@ -46,7 +46,6 @@ from configs import (
 )
 from data import AdversarialSpeechBlockDataset, AdversarialSpeechDataset
 from draugr.visualisation import use_monochrome_style
-
 
 __all__ = []
 
@@ -185,7 +184,7 @@ if __name__ == "__main__":
                                                 hop_length=len(
                                                     spec
                                                 ),  # half of fft length default
-                                                # cmap="gray_r",
+                                                cmap=pyplot.rcParams["image.cmap"],
                                             )
 
                                             ax.set_ylabel("Frequency [hz]")
@@ -234,7 +233,7 @@ if __name__ == "__main__":
                                                 hop_length=len(
                                                     spec
                                                 ),  # half of fft length default
-                                                # cmap="gray_r",
+                                                cmap=pyplot.rcParams["image.cmap"],
                                             )
 
                                             ax.set_ylabel("Frequency [hz]")
@@ -249,7 +248,7 @@ if __name__ == "__main__":
                                                 sr=sr,
                                                 hop_length=256,  # half of fft length default
                                                 # fignum=0,
-                                                # cmap="gray_r",
+                                                cmap=pyplot.rcParams["image.cmap"],
                                                 # aspect="auto",
                                                 # origin="lower",
                                             )

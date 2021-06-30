@@ -28,6 +28,7 @@ from draugr.tqdm_utilities import progress_bar
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
+    StyleSession,
     fix_edge_gridlines,
     ltas_plot,
     monochrome_line_no_marker_cycler,
@@ -35,7 +36,7 @@ from draugr.visualisation import (
 )
 from matplotlib import pyplot
 from scipy.signal import spectrogram
-from warg import ContextWrapper, GDKC, NopContext
+from warg import ContextWrapper, GDKC
 
 from configs import DATA_ROOT_PATH, EXPORT_RESULTS_PATH
 from data import AdversarialSpeechDataset
@@ -89,7 +90,7 @@ if __name__ == "__main__":
                 prop_cycler=monochrome_line_no_marker_cycler,
             ),
             True,
-        ) if use_mono_chrome_style else NopContext():
+        ) if use_mono_chrome_style else StyleSession():
 
             block_window_size = block_window_size_ms
             block_window_step_size = block_window_step_size_ms
@@ -111,11 +112,14 @@ if __name__ == "__main__":
                     if "short-signals" in str(item) and "adv-short-target" in str(item)
                 ]
 
-                file_paths = normals[:num_samples_each]
-                categories = [0] * num_samples_each
+                file_paths = []
+                categories = []
 
                 file_paths += advs[:num_samples_each]
                 categories += [1] * num_samples_each
+
+                file_paths += normals[:num_samples_each]
+                categories += [0] * num_samples_each
 
                 for (ith_file_idx, (file_, file_label)) in zip(
                     range(len(file_paths)),
@@ -165,7 +169,12 @@ if __name__ == "__main__":
                     # id_o = None
                     asd = []
                     for k, (b, sr, a_p, id_a) in a.items():
-                        ltas_plot(b, sr, label=k)
+                        if k == "normal":
+                            k = "benign"
+                            z = 1
+                        else:
+                            z = 2
+                        ltas_plot(b, sr, label=k, zorder=z)
                         p = a_p
                         # id_o=id_a
 
@@ -184,7 +193,14 @@ if __name__ == "__main__":
 
                     ax1 = pyplot.gca()
                     ax2 = ax1.twinx()
-                    ax2.plot(f, numpy.mean(asdsafas, -1), color="0.6", label="diff")
+                    ax1.set_zorder(ax2.get_zorder() + 1)
+                    ax2.plot(
+                        f,
+                        numpy.mean(asdsafas, -1),
+                        color="0.6",
+                        label="diff",
+                        # zorder=1
+                    )
                     fix_edge_gridlines()
                     ax1.legend(loc="upper center")
                     ax2.set_ylabel("Absolute difference", color="0.6")

@@ -7,17 +7,16 @@ __doc__ = r"""
            Created on 28-10-2020
            """
 
-from scipy.io import wavfile
-
 from apppath import ensure_existence
-from configs.path_config import (
-    GENERATED_NOISES_UNPROCESSED_ROOT_PATH,
-    NOISES_SPLIT_UNPROCESSED_ROOT_PATH,
-    AURORA_NOISES,
-)
-
 from draugr.numpy_utilities import Split
 from draugr.tqdm_utilities import progress_bar
+from scipy.io import wavfile
+
+from configs.path_config import (
+    AURORA_NOISES,
+    GENERATED_NOISES_UNPROCESSED_ROOT_PATH,
+    NOISES_SPLIT_UNPROCESSED_ROOT_PATH,
+)
 
 
 def split_noise_files():
