@@ -203,7 +203,7 @@ if __name__ == "__main__":
                     )
                     fix_edge_gridlines()
                     ax1.legend(loc="upper center")
-                    ax2.set_ylabel("Absolute difference", color="0.6")
+                    ax2.set_ylabel("Average absolute difference", color="0.6")
 
                     pyplot.title(f"{file_.stem}")
                     save_embed_fig(f"{p}_diff_average.pdf")
