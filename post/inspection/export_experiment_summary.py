@@ -76,7 +76,7 @@ if __name__ == "__main__":
                     for t in t_:
                         (pt, ct, nt) = AdversarialSpeechBlockDataset(
                             t.path
-                            / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
+                            / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
                             split=Split.Training,
                             random_seed=0,
                             shuffle_data=True,
@@ -116,7 +116,7 @@ if __name__ == "__main__":
                     for t in t_:
                         (pt, ct, nt) = AdversarialSpeechBlockDataset(
                             t.path
-                            / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
+                            / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
                             split=Split.Validation,
                             random_seed=0,
                             shuffle_data=True,
@@ -156,7 +156,7 @@ if __name__ == "__main__":
                     for t in t_:
                         (pt, ct, nt) = AdversarialSpeechBlockDataset(
                             t.path
-                            / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
+                            / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
                             split=Split.Testing,
                             random_seed=0,
                             shuffle_data=True,
@@ -189,8 +189,7 @@ if __name__ == "__main__":
                         writer.writerow(["num_examples", "num_adv", "num_non_adv"])
                         writer.writerow([num_examples, num_adv, num_non_adv])
 
-                break
             break
 
     gather_get_raw_data_summary()
-    # gather_block_data_summary()
+    gather_block_data_summary()

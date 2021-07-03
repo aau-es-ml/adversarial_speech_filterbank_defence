@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
             for data_s, part_id in progress_bar(zip(datasets, out_part_id)):
                 # print(data_s, part_id)
-                normals, advs = AdversarialSpeechDataset.get_normal_adv_wav_file_paths(
+                normals, advs = AdversarialSpeechDataset.get_wav_file_paths(
                     root_path / data_s
                 )
 

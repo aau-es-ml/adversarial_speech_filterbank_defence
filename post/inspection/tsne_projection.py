@@ -27,6 +27,7 @@ from draugr.visualisation import (
     StyleSession,
     monochrome_line_no_marker_cycler,
     save_embed_fig,
+    scatter_auto_mark,
 )
 from matplotlib import pyplot
 from sklearn.manifold import TSNE
@@ -130,27 +131,44 @@ if __name__ == "__main__":
                                         ),
                                         True,
                                     ) if use_monochrome_style else StyleSession():
-                                        scattr = pyplot.scatter(
-                                            *zip(
-                                                *TSNE(
-                                                    n_components=2,
-                                                    random_state=0,
-                                                    perplexity=MISC_CONFIG.tnse_perplexity,
-                                                    learning_rate=MISC_CONFIG.tsne_learning_rate,
-                                                ).fit_transform(
-                                                    torch.flatten(
-                                                        predictor_, start_dim=1
-                                                    )
-                                                    .cpu()
-                                                    .numpy()
-                                                )
-                                            ),
-                                            c=category_.cpu().numpy(),
+                                        x, y = zip(
+                                            *TSNE(
+                                                n_components=2,
+                                                random_state=0,
+                                                perplexity=MISC_CONFIG.tnse_perplexity,
+                                                learning_rate=MISC_CONFIG.tsne_learning_rate,
+                                            ).fit_transform(
+                                                torch.flatten(predictor_, start_dim=1)
+                                                .cpu()
+                                                .numpy()
+                                            )
+                                        )
+                                        """
+                                        mask = category_.cpu().numpy() > 0
+                                        scattr = scatter_auto_mark(
+                                            x[mask],
+                                            y[mask],
+                                            c=category_.cpu().numpy()[mask],
                                             alpha=0.6,
                                             s=2.0,
                                             rasterized=True,
                                             cmap=pyplot.cm.coolwarm,
                                         )
+                                        """
+
+                                        scattr = scatter_auto_mark(
+                                            x,
+                                            y,
+                                            c=category_.cpu().numpy(),
+                                            alpha=0.6,
+                                            s=40.0,
+                                            linewidth=1,
+                                            facecolor="none",
+                                            markerfacecolor="none",
+                                            rasterized=True,
+                                            cmap=pyplot.cm.coolwarm,
+                                        )
+                                        """ # scatter_auto_mark broke legend code
                                         pyplot.legend(
                                             handles=scattr.legend_elements()[0],
                                             labels=[
@@ -160,6 +178,7 @@ if __name__ == "__main__":
                                                 for c in AdversarialSpeechDataset.DataCategories
                                             ],
                                         )
+                                        """
                                         """
                     pyplot.title(f"{str(cepstral_name.value).replace('_',' ')} "
                                  f"{str(k).replace('_',' ')} {num_samples} samples")

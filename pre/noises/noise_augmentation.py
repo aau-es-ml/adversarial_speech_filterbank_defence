@@ -25,20 +25,18 @@ RUN_PARALLEL = False  # REQUIRES LOTS OF RAM!!!!
 
 
 def aug_func(
-    normal_example_file, packed: Tuple[Iterable[Path], Iterable[Path], Path, bool, bool]
+    benign_wav_file, packed: Tuple[Iterable[Path], Iterable[Path], Path, bool, bool]
 ):
     adv_files, noise_files, out_dir, parallel, skip_if_exists = packed
 
-    clean_rvad_mask = get_rvad(*wavfile.read(normal_example_file))
+    clean_rvad_mask = get_rvad(*wavfile.read(benign_wav_file))
     if True:
-        target = (
-            ensure_existence(out_dir / "no_aug" / "normal") / normal_example_file.name
-        )
+        target = ensure_existence(out_dir / "no_aug" / "normal") / benign_wav_file.name
         if skip_if_exists and target.exists():
             pass
         else:
             copyfile(
-                normal_example_file,
+                benign_wav_file,
                 target,
             )
 
@@ -46,7 +44,7 @@ def aug_func(
         for noise_file in progress_bar(noise_files, disable=RUN_PARALLEL):
             compute_additive_noise_samples(
                 voice_activity_mask=clean_rvad_mask,
-                signal_file=normal_example_file,
+                signal_file=benign_wav_file,
                 out_dir=out_dir,
                 category="normal",
                 noise_file=noise_file,
@@ -59,7 +57,7 @@ def aug_func(
             adv_files,
             func_kws=dict(
                 noise_files=noise_files,
-                normal_example_file=normal_example_file,
+                normal_example_file=benign_wav_file,
                 clean_rvad_mask=clean_rvad_mask,
                 out_dir=out_dir,
             ),
@@ -70,7 +68,7 @@ def aug_func(
         ):  # Find adversarial examples matching original and use the clean rvad mask
             adv_noise_aug_func(
                 adv_example_file,
-                packed=(noise_files, normal_example_file, clean_rvad_mask, out_dir),
+                packed=(noise_files, benign_wav_file, clean_rvad_mask, out_dir),
             )
 
 
@@ -113,22 +111,22 @@ def compute_noise_augmented_samples(
             data_path = DATA_ROOT_PATH / f"adversarial_dataset-{ss}"
 
             (
-                normal_files,
+                benign_files,
                 adv_files,
-            ) = AdversarialSpeechDataset.get_normal_adv_wav_file_paths(data_path)
+            ) = AdversarialSpeechDataset.get_wav_file_paths(data_path)
             out_dir = DATA_ROOT_NOISED_UNPROCESSED_PATH / ss
 
             seed_stack(0)
 
-            normal_file_split_indexer = SplitIndexer(
-                len(normal_files),
+            benign_file_split_indexer = SplitIndexer(
+                len(benign_files),
             )
             adv_file_split_indexer = SplitIndexer(len(adv_files))
 
-            for (split, nf_indices, af_indices) in progress_bar(
+            for (split, benign_indices, adv_indices) in progress_bar(
                 zip(
                     Split,
-                    normal_file_split_indexer.shuffled_indices().values(),
+                    benign_file_split_indexer.shuffled_indices().values(),
                     adv_file_split_indexer.shuffled_indices().values(),
                 ),
                 disable=RUN_PARALLEL,
@@ -142,14 +140,14 @@ def compute_noise_augmented_samples(
                     )
                     # noise_files = [nf for nf in noise_files if 'm_' in nf.name]  # TODO: Remove
                     # assert len(noise_files) == 2  # TODO: Remove
-                    normal_files_split = numpy.array(normal_files)[nf_indices]
-                    adv_files_split = numpy.array(adv_files)[af_indices]
+                    benign_files_split = numpy.array(benign_files)[benign_indices]
+                    adv_files_split = numpy.array(adv_files)[adv_indices]
                     out_dir_split = out_dir / split.value
 
                     if parallel:
                         parallel_umap(
                             aug_func,
-                            normal_files_split,
+                            benign_files_split,
                             func_kws=dict(
                                 adv_files=adv_files_split,
                                 noise_files=noise_files,
@@ -159,11 +157,11 @@ def compute_noise_augmented_samples(
                             ),
                         )
                     else:
-                        for normal_example_file in progress_bar(
-                            normal_files_split, disable=RUN_PARALLEL
+                        for benign_wav_file in progress_bar(
+                            benign_files_split, disable=RUN_PARALLEL
                         ):
                             aug_func(
-                                normal_example_file,
+                                benign_wav_file,
                                 packed=(
                                     adv_files_split,
                                     noise_files,

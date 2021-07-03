@@ -189,7 +189,6 @@ def merged_test(
     test_names = []
     merged_name = []
     for t in test_sets:
-
         (pt, ct, nt) = AdversarialSpeechBlockDataset(
             t.path / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
             split=Split.Testing,

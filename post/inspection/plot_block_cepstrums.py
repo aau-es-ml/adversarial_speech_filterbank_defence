@@ -89,7 +89,10 @@ if __name__ == "__main__":
                     )
                 ):
                     t = t_[0]
-                    asd = t.path / f"{transformation.value}_{k}{PROCESSED_FILE_ENDING}"
+                    asd = (
+                        t.path
+                        / f"{transformation.value}_{t.path.name}{PROCESSED_FILE_ENDING}"
+                    )
                     assert asd.exists(), asd
                     (pt, ct, nt,) = AdversarialSpeechBlockDataset.get_all_samples(
                         asd,

@@ -78,7 +78,7 @@ if __name__ == "__main__":
                                 nt,
                             ) = AdversarialSpeechBlockDataset(
                                 t.path
-                                / f"{cepstral_name.value}_{k}{PROCESSED_FILE_ENDING}",
+                                / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
                                 split=Split.Training,
                                 random_seed=0,
                                 train_percentage=1.0,

@@ -10,9 +10,10 @@ __doc__ = r"""
 from pathlib import Path
 
 from apppath import ensure_existence, system_open_path
-from spafe.fbanks import bark_fbanks, gammatone_fbanks, linear_fbanks, mel_fbanks
 from draugr.visualisation import StyleSession
 from matplotlib import pyplot
+from spafe.fbanks import bark_fbanks, gammatone_fbanks, linear_fbanks, mel_fbanks
+
 from configs import EXPORT_RESULTS_PATH
 
 

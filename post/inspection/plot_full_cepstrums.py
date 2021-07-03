@@ -86,7 +86,7 @@ if __name__ == "__main__":
             n_fft_filters = n_fft  # fft length in the matlab mfcc function
 
             for data_s, part_id in progress_bar(zip(datasets, out_part_id)):
-                normals, advs = AdversarialSpeechDataset.get_normal_adv_wav_file_paths(
+                normals, advs = AdversarialSpeechDataset.get_wav_file_paths(
                     root_path / data_s
                 )
 

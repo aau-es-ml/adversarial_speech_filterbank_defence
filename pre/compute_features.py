@@ -227,6 +227,11 @@ def block_wise_feature_extraction(
         block_window_size = (block_window_size_ms * sampling_rate) // 1000
         block_step_size = (block_window_step_size_ms * sampling_rate) // 1000
 
+        print(
+            block_window_size, block_step_size, n_fft, n_fcc, cepstral_window_length_ms
+        )
+        exit()
+
         if (
             block_window_size >= data_len
             or block_step_size >= data_len

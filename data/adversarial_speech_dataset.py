@@ -101,12 +101,20 @@ class AdversarialSpeechDataset(CategoricalDataset):
             "support": collections.Counter(numpy.array(self._response)),
         }
 
+    @property
+    def split(self) -> Split:
+        return self._split
+
     def __init__(
         self,
         dataset_path: pathlib.Path,
-        split: Split = Split.Training,
+        split: Split = Split.Training,  # use None, for all data. However for the article results this was the
+        # parameterisation
         # attack_type: AttackTypeEnum = AttackTypeEnum.WhiteBox,
         random_seed: int = 0,
+        training: float = 0.7,
+        validation: float = 0.2,
+        testing: float = 0.1,
     ):
         """ """
         super().__init__()
@@ -117,7 +125,7 @@ class AdversarialSpeechDataset(CategoricalDataset):
         file_names, response = self.get_dataset_files_and_categories(self._dataset_path)
         if split:
             seed_stack(random_seed)
-            split_by_p = SplitIndexer(len(file_names))
+            split_by_p = SplitIndexer(len(file_names), training, validation, testing)
             ind = split_by_p.select_shuffled_split_indices(split)
             self._file_names = numpy.array(file_names)[ind]
             self._response = numpy.array(response)[ind]
@@ -144,14 +152,14 @@ class AdversarialSpeechDataset(CategoricalDataset):
         (
             normal_files,
             adv_files,
-        ) = AdversarialSpeechDataset.get_normal_adv_wav_file_paths(root_dir)
+        ) = AdversarialSpeechDataset.get_wav_file_paths(root_dir)
         file_names = normal_files + adv_files
         response = [0] * len(normal_files) + [1] * len(adv_files)
 
         return file_names, response
 
     @staticmethod
-    def get_normal_adv_wav_file_paths(
+    def get_wav_file_paths(
         path: pathlib.Path, verbose: bool = False
     ) -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
         """
@@ -161,7 +169,7 @@ class AdversarialSpeechDataset(CategoricalDataset):
         :param verbose:
         :param path:
         :return:"""
-        normal_files = []
+        benign = []
         adv_files = []
         for wav_p in path.rglob("*.wav"):
             if (
@@ -170,7 +178,7 @@ class AdversarialSpeechDataset(CategoricalDataset):
                 or "Normal-Examples" in str(wav_p.parent)
                 or "normal" in str(wav_p.parent)
             ):
-                normal_files.append(wav_p)
+                benign.append(wav_p)
             else:
                 if (
                     "adv-" in wav_p.name
@@ -182,13 +190,13 @@ class AdversarialSpeechDataset(CategoricalDataset):
                 else:
                     print(f"UNEXPECTED! {wav_p}, excluding")
 
-        assert len(normal_files) > 0, f"no normal examples found"
+        assert len(benign) > 0, f"no benign examples found"
         assert len(adv_files) > 0, f"no adversarial examples found"
         if verbose:
             print(path)
-            print(f"num normal samples: {len(normal_files)}")
+            print(f"num normal samples: {len(benign)}")
             print(f"num adversarial samples: {len(adv_files)}")
-        return normal_files, adv_files
+        return benign, adv_files
 
 
 if __name__ == "__main__":
@@ -204,10 +212,10 @@ if __name__ == "__main__":
 
     def main2():
         ds = AdversarialSpeechDataset(DATA_ROOT_A_PATH)
-        _ = ds.get_normal_adv_wav_file_paths(
+        _ = ds.get_wav_file_paths(
             DATA_ROOT_PATH / "adversarial_dataset-A", verbose=True
         )
-        _ = ds.get_normal_adv_wav_file_paths(
+        _ = ds.get_wav_file_paths(
             DATA_ROOT_PATH / "adversarial_dataset-B", verbose=True
         )
         print(
