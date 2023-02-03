@@ -12,7 +12,7 @@ run ``python run_all.py``
 
     Firstly
     
-    - Download the required dataset from [here](https://github.com/zhenghuatan/Audio-adversarial-examples), no official hosting is available.
+    - Download the required dataset from https://github.com/zhenghuatan/Audio-adversarial-examples, no official hosting is available.
 
     - Setup dataset paths in path_config.py, under the ./config path of this project 
     
@@ -29,4 +29,4 @@ run ``python run_all.py``
 
 # Citations
 
-Christian Heider Nielsen and Zheng-Hua Tan, "[Leveraging Domain Features for Detecting Adversarial Attacks Against Deep Speech Recognition in Noise](https://arxiv.org/pdf/2211.01621.pdf)," arXiv preprint arXiv:2211.01621 (2022). [here](https://github.com/zhenghuatan/Audio-adversarial-examples)
+Christian Heider Nielsen and Zheng-Hua Tan, "[Leveraging Domain Features for Detecting Adversarial Attacks Against Deep Speech Recognition in Noise](https://arxiv.org/pdf/2211.01621.pdf)," arXiv preprint arXiv:2211.01621 (2022).
