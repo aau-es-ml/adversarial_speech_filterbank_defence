@@ -14,10 +14,11 @@ from pathlib import Path
 import numpy
 import pandas
 import seaborn
-from apppath import ensure_existence, system_open_path
-from draugr.misc_utilities import plot_median_labels
+from warg import ensure_existence, system_open_path
+
 from draugr.scipy_utilities import min_decimation_subsample
-from draugr.tqdm_utilities import progress_bar
+from draugr.visualisation import progress_bar
+
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
@@ -30,11 +31,16 @@ from draugr.visualisation import (
     make_errorbar_legend,
     monochrome_line_no_marker_cycler,
     save_embed_fig,
+    plot_median_labels,
 )
-from draugr.writers import TestingScalars
+
 from matplotlib import pyplot
 from sklearn.metrics import auc
 from warg import ContextWrapper, GDKC
+from draugr.writers import StandardTestingScalarsEnum
+from warg import ensure_in_sys_path
+
+ensure_in_sys_path(Path(__file__).parent.parent)
 
 from configs import EXPORT_RESULTS_PATH
 
@@ -111,7 +117,7 @@ def stesting_agg_plot(
                                     1
                                 )  # Remove redundant level ('mfcc', 0) to ('mfcc')
 
-                                for tag in TestingScalars:
+                                for tag in StandardTestingScalarsEnum:
                                     color_a = None
                                     if not color_plot:
                                         color_a = "white"
@@ -192,6 +198,7 @@ def stesting_agg_plot(
                                 ):
                                     if transformation.is_dir():
                                         dfs = []
+
                                         for seed_ith in progress_bar(
                                             list(transformation.rglob("*tensors_*.csv"))
                                         ):
@@ -205,6 +212,7 @@ def stesting_agg_plot(
                                                     seed_tensor[column]
                                                 )
                                             dfs.append(seed_tensor)
+
                                         df_transformations[
                                             transformation.name
                                         ] = pandas.concat(
@@ -378,7 +386,7 @@ err_style = VisualisationErrorStyle.Band
                                                         mean_mean_cf_mat
                                                     )
                                                     # mean_cf_mat_res = mean_cf_mat.reshape(2, 2)
-                                                    # print(numpy.sum(mean_cf_mat_res)) # Kind of half as... result, does not sum to one
+                                                    # print(numpy.sum(mean_cf_mat_res)) # Kind of half ass... result, does not sum to one
                                                     sqr = int(
                                                         sqrt(len(mean_mean_cf_mat))
                                                     )
@@ -485,6 +493,7 @@ err_style = VisualisationErrorStyle.Band
                                                                 linewidth=1,
                                                                 linecolor="w",
                                                                 square=True,
+                                                                fmt=".4f",
                                                                 # color=".3",
                                                                 ax=cfm_ax,
                                                             )
@@ -764,12 +773,11 @@ err_style = VisualisationErrorStyle.Band
 
 
 if __name__ == "__main__":
-
     stesting_agg_plot(
         only_latest_load_time=True,
         color_plot=False,
         include_titles=False,
-        compute_scalar_agg=True,
+        compute_scalar_agg=False,
         compute_tensor_agg=True,
     )
 

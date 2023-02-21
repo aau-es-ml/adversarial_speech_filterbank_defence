@@ -10,7 +10,7 @@ __doc__ = r"""
 from pathlib import Path
 
 from apppath import AppPath
-from warg.imports import import_warning
+from warg import import_warning
 
 import_warning(Path(__file__).with_suffix("").name)
 PROJECT_APP_PATH = AppPath("adversarial_speech", __author__)

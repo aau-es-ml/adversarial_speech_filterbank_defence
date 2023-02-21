@@ -10,12 +10,13 @@ __doc__ = r"""
 import os
 from logging import error, info
 from pathlib import Path
+from typing import Iterable
 
 import numpy
 import torch
 from apppath import ensure_existence
-from draugr.numpy_utilities import Split
-from draugr.python_utilities import WorkerSession
+from draugr.numpy_utilities import SplitEnum
+from draugr.os_utilities import WorkerSession
 from draugr.torch_utilities import (
     TensorBoardPytorchWriter,
     TorchEvalSession,
@@ -25,8 +26,8 @@ from draugr.torch_utilities import (
     to_device_iterator,
     to_tensor,
 )
-from draugr.tqdm_utilities import progress_bar
-from draugr.writers import TestingCurves, TestingScalars
+from draugr.visualisation import progress_bar
+from draugr.writers import StandardTestingCurvesEnum, StandardTestingScalarsEnum
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
@@ -36,6 +37,7 @@ from sklearn.metrics import (
 )
 from torch.types import Device
 from torch.utils.data import DataLoader, TensorDataset
+from warg import NOD
 
 from architectures.adversarial_signal_classifier import AdversarialSignalClassifier
 from configs import (
@@ -73,12 +75,11 @@ def separate_test(
                 / model_id
                 / t.path.name,
             ) as writer:
-
                 test_loader = DataLoader(
                     AdversarialSpeechBlockDataset(
                         t.path
                         / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
-                        split=Split.Testing,
+                        split=SplitEnum.testing,
                         shuffle_data=True,
                         train_percentage=t.train_percentage,
                         test_percentage=t.test_percentage,
@@ -104,7 +105,7 @@ def separate_test(
                 test_names = []
                 with TorchEvalSession(model):
                     with torch.no_grad():
-                        for (ith_batch, (predictors, category, names)) in enumerate(
+                        for ith_batch, (predictors, category, names) in enumerate(
                             test_loader
                         ):
                             predictors = to_tensor(
@@ -125,21 +126,23 @@ def separate_test(
                 predictions_np = predictions.cpu().numpy()
                 accuracy_bw = accuracy_score(truth, predictions_int)
 
-                writer.scalar(TestingScalars.test_accuracy.value, accuracy_bw)
                 writer.scalar(
-                    TestingScalars.test_precision.value,
+                    StandardTestingScalarsEnum.test_accuracy.value, accuracy_bw
+                )
+                writer.scalar(
+                    StandardTestingScalarsEnum.test_precision.value,
                     precision_score(truth_np, predictions_int),
                 )
                 writer.scalar(
-                    TestingScalars.test_recall.value,
+                    StandardTestingScalarsEnum.test_recall.value,
                     recall_score(truth_np, predictions_int),
                 )
                 writer.scalar(
-                    TestingScalars.test_receiver_operator_characteristic_auc.value,
+                    StandardTestingScalarsEnum.test_receiver_operator_characteristic_auc.value,
                     roc_auc_score(truth_np, predictions_int),
                 )
                 writer.precision_recall_curve(
-                    TestingCurves.test_precision_recall.value,
+                    StandardTestingCurvesEnum.test_precision_recall.value,
                     predictions,
                     truth,
                 )
@@ -177,7 +180,13 @@ def separate_test(
 
 
 def merged_test(
-    *, load_time, exp_name, cepstral_name, model_path: Path, test_sets, device
+    *,
+    load_time: str,
+    exp_name: str,
+    cepstral_name: CepstralSpaceEnum,
+    model_path: Path,
+    test_sets: NOD,
+    device: torch.device,
 ):
     seed_parent = model_path.parent
     seed = seed_parent.name[-1]
@@ -188,10 +197,11 @@ def merged_test(
     categories = []
     test_names = []
     merged_name = []
+
     for t in test_sets:
         (pt, ct, nt) = AdversarialSpeechBlockDataset(
             t.path / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
-            split=Split.Testing,
+            split=SplitEnum.testing,
             shuffle_data=True,
             train_percentage=t.train_percentage,
             test_percentage=t.test_percentage,
@@ -217,7 +227,6 @@ def merged_test(
             / model_id
             / merged_name_str,
         ) as writer:
-
             predictors = numpy.concatenate(predictors)
             categories = numpy.concatenate(categories)
             test_names = numpy.concatenate(test_names)
@@ -242,7 +251,7 @@ def merged_test(
             truth = []
             with TorchEvalSession(model):
                 with torch.no_grad():
-                    for (ith_batch, (predictors, category)) in enumerate(
+                    for ith_batch, (predictors, category) in enumerate(
                         to_device_iterator(test_loader, device=device)
                     ):
                         predictors = to_tensor(predictors, device=device, dtype=float)
@@ -258,21 +267,21 @@ def merged_test(
             predictions_np = predictions.cpu().numpy()
             accuracy_bw = accuracy_score(truth, predictions_int)
 
-            writer.scalar(TestingScalars.test_accuracy.value, accuracy_bw)
+            writer.scalar(StandardTestingScalarsEnum.test_accuracy.value, accuracy_bw)
             writer.scalar(
-                TestingScalars.test_precision.value,
+                StandardTestingScalarsEnum.test_precision.value,
                 precision_score(truth_np, predictions_int),
             )
             writer.scalar(
-                TestingScalars.test_recall.value,
+                StandardTestingScalarsEnum.test_recall.value,
                 recall_score(truth_np, predictions_int),
             )
             writer.scalar(
-                TestingScalars.test_receiver_operator_characteristic_auc.value,
+                StandardTestingScalarsEnum.test_receiver_operator_characteristic_auc.value,
                 roc_auc_score(truth_np, predictions_int),
             )
             writer.precision_recall_curve(
-                TestingCurves.test_precision_recall.value,
+                StandardTestingCurvesEnum.test_precision_recall.value,
                 predictions,
                 truth,
             )
@@ -315,13 +324,12 @@ def run_all_experiment_test(
     else:
         device = torch.device("cpu")
 
-    global_torch_device(override=device)
+    print(f"Using {global_torch_device(override=device)} device for model inference")
 
     for cepstral_name in progress_bar(CepstralSpaceEnum, description="configs #"):
         for exp_name, exp_v in progress_bar(
             EXPERIMENTS, description=f"{cepstral_name}"
         ):
-
             models = list(MODEL_PERSISTENCE_PATH.rglob(model_names))
             if len(models) == 0:
                 raise FileNotFoundError("No models found")
@@ -384,5 +392,4 @@ def run_all_experiment_test(
 
 
 if __name__ == "__main__":
-
     run_all_experiment_test(only_latest_load_time=False)

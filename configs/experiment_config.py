@@ -12,6 +12,7 @@ from itertools import product
 from pathlib import Path
 
 import torch
+from draugr.numpy_utilities import SplitEnum
 from warg import NOD, import_warning
 
 __all__ = ["EXPERIMENTS"]
@@ -20,7 +21,6 @@ from configs.misc_config import NOISES, SNR_RATIOS
 
 import_warning(Path(__file__).with_suffix("").name)
 
-from draugr.numpy_utilities import Split
 from warg import GDKC
 from configs.path_config import (
     DATA_NOISED_PROCESSED_PATH,
@@ -73,13 +73,13 @@ A_SILENCE = NOD(
 )
 
 DATA_A_NOISED_TRAINING_SPEECH_PATH = (
-    DATA_NOISED_PROCESSED_PATH / "A" / Split.Training.value
+    DATA_NOISED_PROCESSED_PATH / "A" / SplitEnum.training.value
 )
 DATA_A_NOISED_TESTING_SPEECH_PATH = (
-    DATA_NOISED_PROCESSED_PATH / "A" / Split.Testing.value
+    DATA_NOISED_PROCESSED_PATH / "A" / SplitEnum.testing.value
 )
 DATA_A_NOISED_VALIDATION_SPEECH_PATH = (
-    DATA_NOISED_PROCESSED_PATH / "A" / Split.Validation.value
+    DATA_NOISED_PROCESSED_PATH / "A" / SplitEnum.validation.value
 )
 
 NOISED_SSS = {
@@ -410,18 +410,18 @@ NOISES_TO_BBL = rest_exclude_noise_experiment("bbl_morten")
 BBL_TO_NOISES = noise_exclude_experiment("bbl_morten")
 
 EXPERIMENTS = NOD(
-    **TRUNCATED_SETS,
+    # **TRUNCATED_SETS,
     **MERGED_SETS,
-    **TRUNCATED_SPLITS,
-    **MERGED_SPLITS,
-    **NOISED_SETS,
-    **NO_AUG_TO_NOISE,
-    **NOISES_TO_CAF,
-    **CAF_TO_NOISES,
-    **NOISES_TO_BUS,
-    **BUS_TO_NOISES,
-    **NOISES_TO_BBL,
-    **BBL_TO_NOISES,
+    # **TRUNCATED_SPLITS,
+    # **MERGED_SPLITS,
+    # **NOISED_SETS,
+    # **NO_AUG_TO_NOISE,
+    # **NOISES_TO_CAF,
+    # **CAF_TO_NOISES,
+    # **NOISES_TO_BUS,
+    # **BUS_TO_NOISES,
+    # **NOISES_TO_BBL,
+    # **BBL_TO_NOISES,
 )
 
 if __name__ == "__main__":

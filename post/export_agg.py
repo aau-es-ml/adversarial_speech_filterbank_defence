@@ -45,7 +45,7 @@ def compute_agg_plots(
 
 
 if __name__ == "__main__":
-    if True:
+    if False:
         compute_agg_plots(only_latest_load_time=True, color_plot=False)
     else:
         stesting_agg_plot(

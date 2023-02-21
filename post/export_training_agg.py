@@ -15,7 +15,7 @@ import pandas
 import seaborn
 from apppath import ensure_existence, system_open_path
 from draugr.pandas_utilities import ChainedAssignmentOptionEnum
-from draugr.tqdm_utilities import progress_bar
+from draugr.visualisation import progress_bar
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
@@ -28,7 +28,7 @@ from draugr.visualisation import (
     set_y_log_scale,
 )
 from draugr.writers import (
-    TrainingScalars,
+    StandardTrainingScalarsEnum,
     should_plot_y_log_scale,
     should_smooth_series,
 )
@@ -72,7 +72,6 @@ def training_agg_plot(
                         for transformation in progress_bar(
                             mapping.iterdir(), description="transformation #"
                         ):
-
                             if transformation.is_dir():
                                 dfs = {}
                                 a = list(transformation.rglob("*scalars_*.csv"))
@@ -95,8 +94,8 @@ def training_agg_plot(
                             print(f"{mapping} result has nans")
                             raise Exception
 
-                        for tag in TrainingScalars:
-                            # if True or tag is not TrainingScalars.new_best_model:
+                        for tag in StandardTrainingScalarsEnum:
+                            # if True or tag is not StandardTrainingScalarsEnum.new_best_model:
                             hue_a = None
                             if color_plot:
                                 hue_a = result.index
@@ -107,7 +106,6 @@ def training_agg_plot(
                                 ),
                                 not color_plot,
                             ):
-
                                 post_str = ""
                                 ykey = tag.value
                                 if should_smooth_series(tag):
@@ -116,7 +114,6 @@ def training_agg_plot(
                                         "mode.chained_assignment",
                                         ChainedAssignmentOptionEnum.raises.value,
                                     ):
-
                                         ykey = f"smoothed_{tag.value}"
                                         ema_alpha = 0.4
                                         result[ykey] = result[tag.value]
@@ -170,7 +167,10 @@ def training_agg_plot(
 
                                         support_str = ""
                                         if False:
-                                            if tag is TrainingScalars.training_loss:
+                                            if (
+                                                tag
+                                                is StandardTrainingScalarsEnum.training_loss
+                                            ):
                                                 support_str = (
                                                     f"Training Support ({len(t)})"
                                                 )
@@ -214,7 +214,6 @@ for tag in TrainingCurves:
 
 
 if __name__ == "__main__":
-
     training_agg_plot(
         only_latest_load_time=False,
         color_plot=False,

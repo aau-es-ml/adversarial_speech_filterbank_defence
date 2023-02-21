@@ -16,9 +16,9 @@ from typing import Any, Sequence, Tuple
 
 import numpy
 import torch
-from draugr.numpy_utilities import Split
+from draugr.numpy_utilities import SplitEnum
 from draugr.torch_utilities import CategoricalDataset, to_tensor
-from draugr.tqdm_utilities import progress_bar
+from draugr.visualisation import progress_bar
 from sklearn.model_selection import train_test_split
 from warg import OrderedSet
 
@@ -91,7 +91,7 @@ class AdversarialSpeechBlockDataset(CategoricalDataset):
     def __init__(
         self,
         dataset_path: pathlib.Path,
-        split: Split,
+        split: SplitEnum,
         *,
         num_samples: int = None,
         train_percentage: float = 0.7,
@@ -121,15 +121,15 @@ class AdversarialSpeechBlockDataset(CategoricalDataset):
             shuffle_data=shuffle_data,
         )
 
-        if split == split.Training:
+        if split == split.training:
             self._file_names = p_train
             self._response = c_train
             self._names = n_train
-        elif split == split.Testing:
+        elif split == split.testing:
             self._file_names = p_test
             self._response = c_test
             self._names = n_test
-        elif split == split.Validation:
+        elif split == split.validation:
             self._file_names = p_val
             self._response = c_val
             self._names = n_val
@@ -361,7 +361,7 @@ if __name__ == "__main__":
             r"C:\Users\deter\AppData\Local\christian_heider_nielsen\adversarial_speech\processed\regular\A\gfcc_A.npz"
         )
         ds_validation = AdversarialSpeechBlockDataset(
-            path, Split.Validation, shuffle_data=True, num_samples=num_samples
+            path, SplitEnum.validation, shuffle_data=True, num_samples=num_samples
         )
         print(ds_validation.response_shape)
         print(ds_validation.predictor_shape)
@@ -370,10 +370,10 @@ if __name__ == "__main__":
         print(ds_validation.statistics)
 
         ds_testing = AdversarialSpeechBlockDataset(
-            path, Split.Testing, shuffle_data=True, num_samples=num_samples
+            path, SplitEnum.testing, shuffle_data=True, num_samples=num_samples
         )
         ds_training = AdversarialSpeechBlockDataset(
-            path, Split.Training, shuffle_data=True, num_samples=num_samples
+            path, SplitEnum.training, shuffle_data=True, num_samples=num_samples
         )
         print(len(ds_validation))
         print(len(ds_testing))
@@ -383,13 +383,13 @@ if __name__ == "__main__":
         print(a[0].size(), a[1].shape)
 
         ds_trainsad = AdversarialSpeechBlockDataset(
-            path, Split.Training, shuffle_data=True, num_samples=-1
+            path, SplitEnum.training, shuffle_data=True, num_samples=-1
         )
 
         test = False
         try:
             ds_trainsad = AdversarialSpeechBlockDataset(
-                path, Split.Training, shuffle_data=True, num_samples=20000
+                path, SplitEnum.training, shuffle_data=True, num_samples=20000
             )
         except AssertionError:
             test = True

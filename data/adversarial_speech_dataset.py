@@ -21,7 +21,7 @@ __all__ = [
 import numpy
 import torch
 
-from draugr.numpy_utilities import Split, SplitIndexer
+from draugr.numpy_utilities import SplitEnum, SplitIndexer
 from draugr.torch_utilities import to_tensor
 from draugr.random_utilities import seed_stack
 from scipy.io import wavfile
@@ -78,7 +78,7 @@ class AdversarialSpeechDataset(CategoricalDataset):
 
     def get_raw(self, index):
         sampling_rate, wav_data = wavfile.read(self._file_names[index])
-        return to_tensor((wav_data / 2.0 ** 15).astype(float)), sampling_rate
+        return to_tensor((wav_data / 2.0**15).astype(float)), sampling_rate
 
     def get_tensor(self, index):
         raise NotImplementedError
@@ -102,13 +102,13 @@ class AdversarialSpeechDataset(CategoricalDataset):
         }
 
     @property
-    def split(self) -> Split:
+    def split(self) -> SplitEnum:
         return self._split
 
     def __init__(
         self,
         dataset_path: pathlib.Path,
-        split: Split = Split.Training,  # use None, for all data. However for the article results this was the
+        split: SplitEnum = SplitEnum.training,  # use None, for all data. However for the article results this was the
         # parameterisation
         # attack_type: AttackTypeEnum = AttackTypeEnum.WhiteBox,
         random_seed: int = 0,
