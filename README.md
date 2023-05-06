@@ -2,13 +2,13 @@
 
 Can you distinguish these two samples?
 
-Sample 1 | Sample 2
-:-: | :-:
-[wav](sample/sample-000303.wav) | [wav](https://github.com/aau-es-ml/adversarial_speech_filterbank_defence/raw/master/sample/adv-short2short-000303.wav?raw=true)
-
 https://user-images.githubusercontent.com/509350/236642144-126fbce0-53d0-474d-9745-523824938684.mov
 
 https://user-images.githubusercontent.com/509350/236642150-5fb294d7-fb53-4463-851a-bba39345f573.mov
+
+Sample 1 | Sample 2
+:-: | :-:
+[wav](sample/sample-000303.wav) | [wav](https://github.com/aau-es-ml/adversarial_speech_filterbank_defence/raw/master/sample/adv-short2short-000303.wav?raw=true)
 
 And if we let you know, a common voice assistant would register one of these samples as "Open all doors"?
 
