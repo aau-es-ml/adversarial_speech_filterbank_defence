@@ -14,7 +14,7 @@ import numpy
 import pandas
 from apppath import ensure_existence, system_open_path
 from draugr.pandas_utilities.latex_mean_std import pandas_mean_std_latex_table
-from draugr.tqdm_utilities import progress_bar
+from draugr.visualisation import progress_bar
 
 from configs.path_config import EXPORT_RESULTS_PATH
 

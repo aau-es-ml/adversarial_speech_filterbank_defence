@@ -11,7 +11,7 @@ from pathlib import Path
 
 from warg import NOD, import_warning
 
-__all__ = ["MISC_CONFIG"]
+__all__ = ["MISC_CONFIG", "SNR_RATIOS", "NOISES"]
 
 import_warning(Path(__file__).with_suffix("").name)
 

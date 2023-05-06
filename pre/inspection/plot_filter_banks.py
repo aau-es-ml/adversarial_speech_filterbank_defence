@@ -13,8 +13,13 @@ from apppath import ensure_existence, system_open_path
 from draugr.visualisation import StyleSession
 from matplotlib import pyplot
 from spafe.fbanks import bark_fbanks, gammatone_fbanks, linear_fbanks, mel_fbanks
-
+from warg import ContextWrapper, GDKC
 from configs import EXPORT_RESULTS_PATH
+from draugr.visualisation import (
+    FigureSession,
+    MonoChromeStyleSession,
+    monochrome_line_no_marker_cycler,
+)
 
 
 def plot_filter_banks(path: Path, use_mono_chrome_style: bool = False):

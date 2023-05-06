@@ -4,9 +4,10 @@ from typing import Iterable, Tuple
 
 import numpy
 from apppath import ensure_existence
-from draugr.numpy_utilities import Split, SplitIndexer
+from draugr.numpy_utilities import SplitEnum, SplitIndexer
 from draugr.random_utilities import seed_stack
-from draugr.tqdm_utilities import parallel_umap, progress_bar
+from draugr.visualisation import progress_bar, parallel_umap
+
 from neodroidaudition.noise_generation.additive_noise import (
     compute_additive_noise_samples,
 )
@@ -104,7 +105,7 @@ def adv_noise_aug_func(
 
 
 def compute_noise_augmented_samples(
-    parallel: bool = True, skip_if_exists: bool = True, subsets: Split = Split
+    parallel: bool = True, skip_if_exists: bool = True, subsets: SplitEnum = SplitEnum
 ):
     if True:
         for ss in progress_bar(("A",), disable=RUN_PARALLEL):
@@ -123,16 +124,15 @@ def compute_noise_augmented_samples(
             )
             adv_file_split_indexer = SplitIndexer(len(adv_files))
 
-            for (split, benign_indices, adv_indices) in progress_bar(
+            for split, benign_indices, adv_indices in progress_bar(
                 zip(
-                    Split,
+                    SplitEnum,
                     benign_file_split_indexer.shuffled_indices().values(),
                     adv_file_split_indexer.shuffled_indices().values(),
                 ),
                 disable=RUN_PARALLEL,
             ):
                 if split in subsets:
-
                     noise_files = list(
                         (NOISES_SPLIT_UNPROCESSED_ROOT_PATH / split.value).rglob(
                             "*.wav"
@@ -175,12 +175,11 @@ def compute_noise_augmented_samples(
 
 
 if __name__ == "__main__":
-
     compute_noise_augmented_samples(
         parallel=RUN_PARALLEL,
         # subsets=(
-        # Split.Training,
-        # Split.Validation,
-        # Split.Testing
+        # SplitEnum.Training,
+        # SplitEnum.Validation,
+        # SplitEnum.Testing
     )
     # )

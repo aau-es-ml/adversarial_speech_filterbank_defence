@@ -10,7 +10,7 @@ __doc__ = r"""
 import numpy
 import torch
 from apppath import ensure_existence
-from draugr.numpy_utilities import Split
+from draugr.numpy_utilities import SplitEnum
 from draugr.random_utilities import seed_stack
 from draugr.torch_utilities import (
     TensorBoardPytorchWriter,
@@ -20,7 +20,7 @@ from draugr.torch_utilities import (
     to_device_iterator,
     to_tensor,
 )
-from draugr.tqdm_utilities import progress_bar
+from draugr.visualisation import progress_bar
 from draugr.visualisation import (
     FigureSession,
     MonoChromeStyleSession,
@@ -57,7 +57,6 @@ if __name__ == "__main__":
             for exp_name, exp_v in progress_bar(
                 EXPERIMENTS, description=f"{cepstral_name}"
             ):
-
                 with ContextWrapper(
                     TensorBoardPytorchWriter(
                         PROJECT_APP_PATH.user_log
@@ -79,7 +78,7 @@ if __name__ == "__main__":
                             ) = AdversarialSpeechBlockDataset(
                                 t.path
                                 / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
-                                split=Split.Training,
+                                split=SplitEnum.training,
                                 random_seed=0,
                                 train_percentage=1.0,
                                 test_percentage=0,

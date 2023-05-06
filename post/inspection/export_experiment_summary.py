@@ -12,12 +12,12 @@ import csv
 import numpy
 import torch
 from apppath import ensure_existence
-from draugr.numpy_utilities import Split
+from draugr.numpy_utilities import SplitEnum
 from draugr.torch_utilities import (
     auto_select_available_cuda_device,
     global_torch_device,
 )
-from draugr.tqdm_utilities import progress_bar
+from draugr.visualisation import progress_bar
 
 from configs.experiment_config import EXPERIMENTS
 from configs.path_config import (
@@ -32,7 +32,6 @@ from pre.cepstral_spaces import CepstralSpaceEnum
 if __name__ == "__main__":
 
     def gather_get_raw_data_summary():
-
         summary_path = ensure_existence(EXPORT_RESULTS_PATH / "raw_sum")
 
         for source_path in [DATA_ROOT_A_PATH, DATA_ROOT_B_PATH]:
@@ -68,7 +67,6 @@ if __name__ == "__main__":
             for exp_name, exp_v in progress_bar(
                 EXPERIMENTS, description=f"{cepstral_name}"
             ):
-
                 for k, t_ in exp_v.Train_Sets.items():
                     predictors = []
                     categories = []
@@ -77,7 +75,7 @@ if __name__ == "__main__":
                         (pt, ct, nt) = AdversarialSpeechBlockDataset(
                             t.path
                             / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
-                            split=Split.Training,
+                            split=SplitEnum.training,
                             random_seed=0,
                             shuffle_data=True,
                             train_percentage=t.train_percentage,
@@ -117,7 +115,7 @@ if __name__ == "__main__":
                         (pt, ct, nt) = AdversarialSpeechBlockDataset(
                             t.path
                             / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
-                            split=Split.Validation,
+                            split=SplitEnum.validation,
                             random_seed=0,
                             shuffle_data=True,
                             train_percentage=t.train_percentage,
@@ -157,7 +155,7 @@ if __name__ == "__main__":
                         (pt, ct, nt) = AdversarialSpeechBlockDataset(
                             t.path
                             / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
-                            split=Split.Testing,
+                            split=SplitEnum.testing,
                             random_seed=0,
                             shuffle_data=True,
                             train_percentage=t.train_percentage,

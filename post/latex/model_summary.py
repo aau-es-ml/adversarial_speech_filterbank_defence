@@ -13,8 +13,10 @@ from pathlib import Path
 
 import numpy
 import torch
-from draugr import WorkerSession
-from draugr.numpy_utilities import Split
+
+from draugr.numpy_utilities import SplitEnum
+from draugr.os_utilities import WorkerSession
+
 from draugr.torch_utilities import (
     TensorBoardPytorchWriter,
     auto_select_available_cuda_device,
@@ -22,7 +24,7 @@ from draugr.torch_utilities import (
     global_torch_device,
     to_tensor,
 )
-from draugr.tqdm_utilities import progress_bar
+from draugr.visualisation import progress_bar
 from torch.utils.data import DataLoader, TensorDataset
 
 from architectures import AdversarialSignalClassifier
@@ -50,10 +52,9 @@ def merged_test(
     test_names = []
     merged_name = []
     for t in test_sets:
-
         (pt, ct, nt) = AdversarialSpeechBlockDataset(
             t.path / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
-            split=Split.Testing,
+            split=SplitEnum.testing,
             shuffle_data=True,
             train_percentage=t.train_percentage,
             test_percentage=t.test_percentage,
@@ -116,7 +117,6 @@ def run_all_experiment_test(
         for exp_name, exp_v in progress_bar(
             EXPERIMENTS, description=f"{cepstral_name}"
         ):
-
             models = list(MODEL_PERSISTENCE_PATH.rglob(model_names))
             if len(models) == 0:
                 raise FileNotFoundError("No models found")
@@ -170,5 +170,4 @@ def run_all_experiment_test(
 
 
 if __name__ == "__main__":
-
     run_all_experiment_test(only_latest_load_time=False)

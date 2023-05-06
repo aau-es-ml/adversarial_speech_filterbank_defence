@@ -1,4 +1,18 @@
-# Adversarial Speech
+# Adversarial Speech Defence
+
+Can you distinguish these two samples?
+
+Sample 1 | Sample 2
+:-: | :-:
+<video src='sample/sample-000303.mp4' width=180/> | <video src='sample/adv-short2short-000303.mp4' width=180/>
+[wav](sample/sample-000303.wav) | [wav](sample/sample/adv-short2short-000303.wav)
+
+And if we let you know, a common voice assistant would register one of these samples as "Open all doors"?
+
+This work strives to detect these adversarial attacks by employing the underutilised power of cepstral coefficients 
+computed using cleverly designed filter-banks and especially inverse filter-banks as shown in our article.
+
+To get started trying to run our experiments yourself, just follow the steps below.    
 
 # Usage
 

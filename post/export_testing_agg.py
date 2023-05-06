@@ -151,9 +151,9 @@ def stesting_agg_plot(
 
                                                 support_str = ""
                                                 if False:
-                                                    support_str = (
-                                                        f"Test Support ({len(t)})"
-                                                    )
+                                                    ...
+                                                    # support_str = (
+                                                # f"Test Support ({len(t)})"                                                    )
                                                 pyplot.title(
                                                     support_str
                                                     + " "
@@ -744,7 +744,8 @@ err_style = VisualisationErrorStyle.Band
                                             pyplot.suptitle(sup_title)
                                             support_str = ""
                                             if False:
-                                                support_str = f"Test Support ({len(t)})"  # num samples
+                                                ...
+                                                # support_str = f"Test Support ({len(t)})"  # num samples
 
                                             pyplot.title(
                                                 support_str

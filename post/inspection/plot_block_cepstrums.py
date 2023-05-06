@@ -32,10 +32,10 @@ from draugr.torch_utilities import (
     to_device_iterator,
     to_tensor,
 )
-from draugr.tqdm_utilities import progress_bar
-from draugr.numpy_utilities import Split
+from draugr.visualisation import progress_bar
+from draugr.numpy_utilities import SplitEnum
 from draugr.visualisation import SubplotSession
-from warg import NOD
+from warg import NOD, nop
 
 from configs.experiment_config import NO_AUG_TO_NOISE
 from pre.cepstral_spaces import CepstralSpaceEnum, OtherSpacesEnum
@@ -94,7 +94,11 @@ if __name__ == "__main__":
                         / f"{transformation.value}_{t.path.name}{PROCESSED_FILE_ENDING}"
                     )
                     assert asd.exists(), asd
-                    (pt, ct, nt,) = AdversarialSpeechBlockDataset.get_all_samples(
+                    (
+                        pt,
+                        ct,
+                        nt,
+                    ) = AdversarialSpeechBlockDataset.get_all_samples(
                         asd,
                         shuffle_data=False,
                         random_seed=42,
@@ -127,10 +131,12 @@ if __name__ == "__main__":
                     assert len(rep_entries), "Did you run asc_plot_signals.py first?"
 
                     with torch.no_grad():
-                        ds_ = AdversarialSpeechDataset(DATA_ROOT_PATH, Split.Testing)
+                        ds_ = AdversarialSpeechDataset(
+                            DATA_ROOT_PATH, SplitEnum.testing
+                        )
                         sr = ds_.get_raw(0)[-1]  # 16000
 
-                        for (predictors2, category, indices2) in progress_bar(
+                        for predictors2, category, indices2 in progress_bar(
                             to_device_iterator(test_loader, device=device),
                             total=len(predictors),
                         ):  # Dumb way of selecting

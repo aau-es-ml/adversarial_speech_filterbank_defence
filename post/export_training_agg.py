@@ -171,13 +171,13 @@ def training_agg_plot(
                                                 tag
                                                 is StandardTrainingScalarsEnum.training_loss
                                             ):
-                                                support_str = (
-                                                    f"Training Support ({len(t)})"
-                                                )
+                                                ...
+                                                # support_str = (
+                                            # f"Training Support ({len(t)})"                                                )
                                             else:
-                                                support_str = (
-                                                    f"Validation Support ({len(t)})"
-                                                )
+                                                ...
+                                                # support_str = (
+                                                # f"Validation Support ({len(t)})"                                                )
 
                                         pyplot.title(
                                             support_str

@@ -108,8 +108,8 @@ class AdversarialSpeechDataset(CategoricalDataset):
     def __init__(
         self,
         dataset_path: pathlib.Path,
-        split: SplitEnum = SplitEnum.training,  # use None, for all data. However for the article results this was the
-        # parameterisation
+        split: SplitEnum = SplitEnum.training,  # Use None, for all data.
+        # However, for the article results this was the parametrisation
         # attack_type: AttackTypeEnum = AttackTypeEnum.WhiteBox,
         random_seed: int = 0,
         training: float = 0.7,

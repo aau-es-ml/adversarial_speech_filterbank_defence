@@ -8,8 +8,8 @@ __doc__ = r"""
            """
 
 from apppath import ensure_existence
-from draugr.numpy_utilities import Split
-from draugr.tqdm_utilities import progress_bar
+from draugr.numpy_utilities import SplitEnum
+from draugr.visualisation import progress_bar
 from scipy.io import wavfile
 
 from configs.path_config import (
@@ -33,21 +33,25 @@ def split_noise_files():
             noise[-split_size:],
         )
         wavfile.write(
-            ensure_existence(NOISES_SPLIT_UNPROCESSED_ROOT_PATH / Split.Training.value)
+            ensure_existence(
+                NOISES_SPLIT_UNPROCESSED_ROOT_PATH / SplitEnum.training.value
+            )
             / noise_file.name,
             sr_noise,
             train,
         )
         wavfile.write(
             ensure_existence(
-                NOISES_SPLIT_UNPROCESSED_ROOT_PATH / Split.Validation.value
+                NOISES_SPLIT_UNPROCESSED_ROOT_PATH / SplitEnum.validation.value
             )
             / noise_file.name,
             sr_noise,
             valid,
         )
         wavfile.write(
-            ensure_existence(NOISES_SPLIT_UNPROCESSED_ROOT_PATH / Split.Testing.value)
+            ensure_existence(
+                NOISES_SPLIT_UNPROCESSED_ROOT_PATH / SplitEnum.testing.value
+            )
             / noise_file.name,
             sr_noise,
             test,

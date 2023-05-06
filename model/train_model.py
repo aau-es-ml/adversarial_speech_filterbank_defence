@@ -16,8 +16,8 @@ from typing import Iterable, Tuple
 import numpy
 import torch
 from apppath import ensure_existence
-from draugr.numpy_utilities import Split
-from draugr.python_utilities import WorkerSession
+from draugr.numpy_utilities import SplitEnum
+from draugr.os_utilities import WorkerSession
 from draugr.random_utilities import seed_stack
 from draugr.torch_utilities import (
     TensorBoardPytorchWriter,
@@ -31,8 +31,11 @@ from draugr.torch_utilities import (
     to_tensor,
     torch_clean_up,
 )
-from draugr.tqdm_utilities import progress_bar
-from draugr.writers import TrainingCurves, TrainingScalars
+from draugr.visualisation import progress_bar
+from draugr.writers.standard_tags import (
+    StandardTrainingCurvesEnum,
+    StandardTrainingScalarsEnum,
+)
 from torch.types import Device
 from torch.utils.data import DataLoader, TensorDataset
 from warg import GDKC
@@ -72,7 +75,6 @@ def train_asc(
     for ith_epoch in progress_bar(
         range(num_epochs + 1), description=f"{cfg_name}", leave=False
     ):
-
         if ith_epoch % validation_interval == 0:
             writer.parameters(model, ith_epoch)
             loss_accum_val = 0.0
@@ -98,14 +100,16 @@ def train_asc(
                         ps.append(pred_s)
 
             val_loss = loss_accum_val / ith_batch
-            writer.scalar(TrainingScalars.validation_loss.value, val_loss, ith_epoch)
             writer.scalar(
-                TrainingScalars.validation_accuracy.value,
+                StandardTrainingScalarsEnum.validation_loss.value, val_loss, ith_epoch
+            )
+            writer.scalar(
+                StandardTrainingScalarsEnum.validation_accuracy.value,
                 accuracy_accum_val / ith_batch,
                 ith_epoch,
             )
             writer.precision_recall_curve(
-                TrainingCurves.validation_precision_recall.value,
+                StandardTrainingCurvesEnum.validation_precision_recall.value,
                 torch.cat(ps, 0),
                 torch.cat(ts, 0),
                 ith_epoch,
@@ -114,9 +118,13 @@ def train_asc(
             if val_loss < best_val:
                 best_val = val_loss
                 torch.save(model.state_dict(), str(out_path / BEST_VAL_MODEL_NAME))
-                writer.scalar(TrainingScalars.new_best_model.value, 1, ith_epoch)
+                writer.scalar(
+                    StandardTrainingScalarsEnum.new_best_model.value, 1, ith_epoch
+                )
             else:
-                writer.scalar(TrainingScalars.new_best_model.value, 0, ith_epoch)
+                writer.scalar(
+                    StandardTrainingScalarsEnum.new_best_model.value, 0, ith_epoch
+                )
 
         if ith_epoch < num_epochs:
             accum_loss = 0.0
@@ -133,7 +141,7 @@ def train_asc(
                     accum_loss += to_scalar(loss)
 
             writer.scalar(
-                TrainingScalars.training_loss.value,
+                StandardTrainingScalarsEnum.training_loss.value,
                 accum_loss
                 / ith_batch,  # ith_batch has the number of batches that was accumulated over
                 ith_epoch,
@@ -181,7 +189,7 @@ def out_train_separate(
                             AdversarialSpeechBlockDataset(
                                 tt.path
                                 / f"{cepstral_name.value}_{tt.path.name}{PROCESSED_FILE_ENDING}",
-                                split=Split.Training,
+                                split=SplitEnum.training,
                                 shuffle_data=True,
                                 train_percentage=tt.train_percentage,
                                 test_percentage=tt.test_percentage,
@@ -198,7 +206,7 @@ def out_train_separate(
                             AdversarialSpeechBlockDataset(
                                 vt.path
                                 / f"{cepstral_name.value}_{vt.path.name}{PROCESSED_FILE_ENDING}",
-                                split=Split.Validation,
+                                split=SplitEnum.validation,
                                 train_percentage=vt.train_percentage,
                                 test_percentage=vt.test_percentage,
                                 validation_percentage=vt.validation_percentage,
@@ -271,7 +279,7 @@ def out_train_merged(
                     (pt, ct, nt) = AdversarialSpeechBlockDataset(
                         t.path
                         / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
-                        split=Split.Training,
+                        split=SplitEnum.training,
                         train_percentage=t.train_percentage,
                         test_percentage=t.test_percentage,
                         validation_percentage=t.validation_percentage,
@@ -294,7 +302,7 @@ def out_train_merged(
                     (pv, cv, nv) = AdversarialSpeechBlockDataset(
                         t.path
                         / f"{cepstral_name.value}_{t.path.name}{PROCESSED_FILE_ENDING}",
-                        split=Split.Validation,
+                        split=SplitEnum.validation,
                         shuffle_data=True,
                         train_percentage=t.train_percentage,
                         test_percentage=t.test_percentage,
@@ -420,7 +428,6 @@ def run_all_experiment_train(spaces: Iterable = CepstralSpaceEnum):
 
 
 if __name__ == "__main__":
-
     run_all_experiment_train(
         # spaces = (CepstralSpaceEnum.linear_fcc,)
     )
