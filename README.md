@@ -1,4 +1,4 @@
-# Adversarial Speech Defence
+# Adversarial Speech Filterbank Defence
 
 Can you distinguish these two samples?
 
