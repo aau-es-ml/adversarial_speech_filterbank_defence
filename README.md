@@ -10,10 +10,10 @@ Sample 1 | Sample 2
 :-: | :-:
 [wav](sample/sample-000303.wav) | [wav](https://github.com/aau-es-ml/adversarial_speech_filterbank_defence/raw/master/sample/adv-short2short-000303.wav?raw=true)
 
-And if we let you know, a common voice assistant would register one of these samples as "Open all doors"?
+And if we let you know, a deep speech recongizer would classify one of these samples as "Open all doors"?
 
 This work strives to detect these adversarial attacks by employing the underutilised power of cepstral coefficients 
-computed using cleverly designed filter-banks and especially inverse filter-banks as shown in our article.
+computed using designed filter-banks and especially inverse filter-banks as shown in our article.
 
 To get started trying to run our experiments yourself, just follow the steps below.    
 
