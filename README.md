@@ -46,7 +46,7 @@ run ``python run_all.py``
 
 # Citations
 
-Christian Heider Nielsen and Zheng-Hua Tan, "[Leveraging Domain Features for Detecting Adversarial Attacks Against Deep Speech Recognition in Noise]([https://arxiv.org/pdf/2211.01621.pdf](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10076798))," IEEE Open Journal of Signal Processing, vol. 4, pp. 179-187, 2023.
+Christian Heider Nielsen and Zheng-Hua Tan, "[Leveraging Domain Features for Detecting Adversarial Attacks Against Deep Speech Recognition in Noise](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10076798)," IEEE Open Journal of Signal Processing, vol. 4, pp. 179-187, 2023.
 
 Dataset is available [here](https://github.com/zhenghuatan/Audio-adversarial-examples).
 
